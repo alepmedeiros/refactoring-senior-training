@@ -1,7 +1,3 @@
-<!-- <div align="center">
-    <img src="https://user-images.githubusercontent.com/37020399/155749839-aaa7b708-6d92-4c19-a8bc-d2ca96c4117a.jpg" />
-</div> -->
-
 ![alt_text](./public/refactoring-design-code.png)
 
 ---
