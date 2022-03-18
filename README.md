@@ -71,4 +71,4 @@ If your answer to these questions is "no", you have legacy code and it is consum
 
 > ### Contribution guide
 
-*[How to proceed]()
+* [How to proceed]()
