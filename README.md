@@ -71,5 +71,10 @@ If your answer to these questions is "no", you have legacy code and it is consum
 
 > ### Contribution guide
 
-* [Fork a Github repostiory]()
-* [Clone the forked repository to your local system]()
+* [Fork a Github repository.](./requirements/fork-github-repository.md)
+* [Clone the forked repository to your local system.](./requirements/clone-fork-local.md)
+* [Add a Git remote for the original repository.](./requirements/add-remote.md)
+* [Create a feature branch in which to place your changes.](./requirements/working-branch.md)
+* [Push the branch to GitHub.](./requirements/push-branch-github.md)
+* [Open a pull request from the new branch to the original repo.](./requirements/opening-pull-request.md))
+* [Clean up after your pull request is merged.]()
