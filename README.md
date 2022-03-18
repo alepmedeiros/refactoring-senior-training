@@ -1,7 +1,3 @@
-<!-- <div align="center">
-    <img src="https://user-images.githubusercontent.com/37020399/155749839-aaa7b708-6d92-4c19-a8bc-d2ca96c4117a.jpg" />
-</div> -->
-
 ![alt_text](./public/refactoring-design-code.png)
 
 ---
@@ -72,3 +68,8 @@ If your answer to these questions is "no", you have legacy code and it is consum
 * [GitFlow](https://www.atlassian.com/br/git/tutorials/comparing-workflows/gitflow-workflow)
 * [Modular Design](https://en.wikipedia.org/wiki/Modular_design)
 * [Use Cases](https://en.wikipedia.org/wiki/Use_case)
+
+> ### Contribution guide
+
+* [Fork a Github repostiory]()
+* [Clone the forked repository to your local system]()
