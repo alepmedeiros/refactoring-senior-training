@@ -68,3 +68,7 @@ If your answer to these questions is "no", you have legacy code and it is consum
 * [GitFlow](https://www.atlassian.com/br/git/tutorials/comparing-workflows/gitflow-workflow)
 * [Modular Design](https://en.wikipedia.org/wiki/Modular_design)
 * [Use Cases](https://en.wikipedia.org/wiki/Use_case)
+
+> ### Contribution guide
+
+*[How to proceed]()
