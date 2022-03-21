@@ -1,4 +1,4 @@
-![alt_text](./public/git-push.png)
+![alt_text](../public/git-push.png)
 
 ---
 

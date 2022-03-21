@@ -1,4 +1,4 @@
-![alt_text](./public/pull-request.png)
+![alt_text](../public/pull-request.png)
 
 ---
 

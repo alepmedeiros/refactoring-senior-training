@@ -1,4 +1,4 @@
-![alt_text](./public/git-branches-merge.png)
+![alt_text](../public/git-branches-merge.png)
 
 ---
 

@@ -1,4 +1,4 @@
-![alt_text](./public/refactoring-design-code.png)
+![alt_text](../public/refactoring-design-code.png)
 
 ---
 
