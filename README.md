@@ -77,4 +77,4 @@ If your answer to these questions is "no", you have legacy code and it is consum
 * [Create a feature branch in which to place your changes.](./requirements/working-branch.md)
 * [Push the branch to GitHub.](./requirements/push-branch-github.md)
 * [Open a pull request from the new branch to the original repo.](./requirements/opening-pull-request.md))
-* [Clean up after your pull request is merged.]()
+* [Clean up after your pull request is merged.](./requirements/cleaning-after-merged.md)
