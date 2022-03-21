@@ -22,7 +22,7 @@ If your answer to these questions is "no", you have legacy code and it is consum
 > * Explore the refactorings, each with its own explanation, mechanism.
 > * Write robust tests or your refactorings.
 
-1. [Refactoring Principles.](./requirements/refactoring-principles.md)
+<!-- 1. [Refactoring Principles.](./requirements/refactoring-principles.md)
 2. [Bad smell in the code](./requirements/bad-small-code.md)
 3. [Refactoring set.](./requirements/refactoring-set.md)
 4. [Encapsulation.](./requirements/encapsulation.md)
@@ -67,7 +67,7 @@ If your answer to these questions is "no", you have legacy code and it is consum
 * [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 * [GitFlow](https://www.atlassian.com/br/git/tutorials/comparing-workflows/gitflow-workflow)
 * [Modular Design](https://en.wikipedia.org/wiki/Modular_design)
-* [Use Cases](https://en.wikipedia.org/wiki/Use_case)
+* [Use Cases](https://en.wikipedia.org/wiki/Use_case) -->
 
 > ### Contribution guide
 
