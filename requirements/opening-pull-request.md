@@ -1,7 +1,3 @@
-![alt_text](../public/pull-request.png)
-
----
-
 > ### Opening a Pull Request
 
 GitHub makes this part incredibly easy. Once you push a new branch up to your repository, GitHub will prompt you to create a pull request (I’m assuming you’re using your browser and not the GitHub native apps). 

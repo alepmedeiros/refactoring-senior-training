@@ -1,7 +1,3 @@
-![alt_text](../public/clone.png)
-
----
-
 > ### Adding a Remote
 
 Git already added a Git remote named origin to the clone of the Git repository on your system, and this will allow you to push changes back up to the forked repository in your GitHub account using git commit (to add commits locally) and git push.

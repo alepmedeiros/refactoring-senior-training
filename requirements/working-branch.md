@@ -1,7 +1,3 @@
-![alt_text](../public/git-branches-merge.png)
-
----
-
 > ### Working in a Branch
 
 So far, you’ve forked a project repository, cloned it down to your local system, and added a Git remote to your clone that points to the original project repository on GitHub. Now you’re ready to start making changes to your local Git repository. To effectively collaborate with others on the same repo, you should use a branch.

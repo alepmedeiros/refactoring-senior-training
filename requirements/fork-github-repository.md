@@ -1,7 +1,3 @@
-![alt_text](../public/code-fork-icon-64988.png)
-
----
-
 > ### Forking a Github Repository
 
 The first step is to fork the Github repository.

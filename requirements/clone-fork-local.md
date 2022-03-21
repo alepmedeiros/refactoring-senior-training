@@ -1,7 +1,3 @@
-![alt_text](../public/clone.png)
-
----
-
 > ### Making a Local Clone
 
 Even though you have a copy of the original repository in your GitHub account, you don’t yet have a way to make changes to your copy of the repository. For that you will have to run the command git clone.
