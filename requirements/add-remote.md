@@ -1,4 +1,4 @@
-![alt_text](./public/clone.png)
+![alt_text](../public/clone.png)
 
 ---
 
