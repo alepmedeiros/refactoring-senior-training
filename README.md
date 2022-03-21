@@ -22,6 +22,8 @@ If your answer to these questions is "no", you have legacy code and it is consum
 > * Explore the refactorings, each with its own explanation, mechanism.
 > * Write robust tests or your refactorings.
 
+> ### [Refactoring](./requirements/refactoring.md)
+
 <!-- 1. [Refactoring Principles.](./requirements/refactoring-principles.md)
 2. [Bad smell in the code](./requirements/bad-small-code.md)
 3. [Refactoring set.](./requirements/refactoring-set.md)
