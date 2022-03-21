@@ -1,4 +1,4 @@
-![alt_text](./public/code-fork-icon-64988.png)
+![alt_text](../public/code-fork-icon-64988.png)
 
 ---
 
