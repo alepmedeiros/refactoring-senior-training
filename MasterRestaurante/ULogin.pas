@@ -3,8 +3,19 @@ unit ULogin;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, Buttons, JPEG;
+  Windows,
+  Messages,
+  SysUtils,
+  Variants,
+  Classes,
+  Graphics,
+  Controls,
+  Forms,
+  Dialogs,
+  ExtCtrls,
+  StdCtrls,
+  Buttons,
+  JPEG;
 
 type
   TLoginForm = class(TForm)
@@ -37,7 +48,12 @@ var
   LoginForm: TLoginForm;
 
 implementation
-uses Base, UPrincipal, Base64, UFuncoes;
+
+uses Base,
+  UPrincipal,
+  Base64,
+  UFuncoes;
+
 {$R *.dfm}
 
 procedure TLoginForm.BTCancelarClick(Sender: TObject);
@@ -48,77 +64,77 @@ end;
 
 procedure TLoginForm.BTOkClick(Sender: TObject);
 var
-  temp : ShortString;
+  temp: ShortString;
 begin
-  if not (EditLogin.Text <> '') then
-    Mensagem('Informe um Login.', mtWarning,[mbOk],mrOK,0)
+  if not(EditLogin.Text <> '') then
+    Mensagem('Informe um Login.', mtWarning, [mbOk], mrOK, 0)
+  else if not(EditSenha.Text <> '') then
+    Mensagem('Informe uma Senha.', mtWarning, [mbOk], mrOK, 0)
   else
-    if not (EditSenha.Text <> '') then
-      Mensagem('Informe uma Senha.', mtWarning,[mbOk],mrOK,0)
+  begin
+    temp := Base64EncodeStr(EditSenha.Text);
+    with BancoDados.qryLogin do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from vendedor where Upper(login) = ' +
+        QuotedStr(EditLogin.Text) + ' and senha = ' + QuotedStr(EditSenha.Text)
+        + ' and Ativo = 1');
+      Open;
+    end;
+
+    with BancoDados.qryVendedorFuncao do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('select * from vendedor_funcao where vendedor_funcao_id = ' +
+        IntToStr(BancoDados.qryLoginVENDEDOR_FUNCAO_ID.Value));
+      Open;
+    end;
+
+    if not(BancoDados.qryVendedorFuncaoABREVIACAO.Value = 'OP_CX') then
+    begin
+      Logado := False;
+      Mensagem('O Vendedor informado não tem Permissão de Operação de Caixa!',
+        mtWarning, [mbOk], mrOK, 0);
+    end
     else
-      begin
-        temp := Base64EncodeStr(EditSenha.Text);
-        with BancoDados.qryLogin do
-          begin
-            Close;
-            SQL.Clear;
-            SQL.Add('select * from vendedor where Upper(login) = ' +
-              QuotedStr(EditLogin.Text) + ' and senha = ' +
-              QuotedStr(EditSenha.Text) + ' and Ativo = 1');
-            Open;
-          end;
-
-        with BancoDados.qryVendedorFuncao do
-          begin
-            Close;
-            SQL.Clear;
-            SQL.Add('select * from vendedor_funcao where vendedor_funcao_id = ' +
-              IntToStr(BancoDados.qryLoginVENDEDOR_FUNCAO_ID.Value));
-            Open;
-          end;
-
-        if not (BancoDados.qryVendedorFuncaoABREVIACAO.Value = 'OP_CX') then
-          begin
-            Logado := False;
-            Mensagem('O Vendedor informado não tem Permissão de Operação de Caixa!', mtWarning,[mbOk],mrOK,0);
-          end
-        else
-          begin
-            if not (BancoDados.qryLogin.IsEmpty) then
-              Logado := True
-            else
-              Mensagem('Usuário não Encontrado.', mtWarning,[mbOk],mrOK,0);
-          end;
-        Close;
-      end;
+    begin
+      if not(BancoDados.qryLogin.IsEmpty) then
+        Logado := True
+      else
+        Mensagem('Usuário não Encontrado.', mtWarning, [mbOk], mrOK, 0);
+    end;
+    Close;
+  end;
 end;
 
 procedure TLoginForm.EditLoginKeyPress(Sender: TObject; var Key: Char);
 begin
   if (Key = #13) then
+  begin
+    if not(EditLogin.Text <> '') then
     begin
-      if not (EditLogin.Text <> '') then
-        begin
-          Mensagem('Informe um Login.', mtWarning,[mbOk],mrOK,0);
-          EditLogin.SetFocus;
-        end
-      else
-        EditSenha.SetFocus;
-    end;
+      Mensagem('Informe um Login.', mtWarning, [mbOk], mrOK, 0);
+      EditLogin.SetFocus;
+    end
+    else
+      EditSenha.SetFocus;
+  end;
 end;
 
 procedure TLoginForm.EditSenhaKeyPress(Sender: TObject; var Key: Char);
 begin
   if (Key = #13) then
+  begin
+    if not(EditSenha.Text <> '') then
     begin
-      if not (EditSenha.Text <> '') then
-        begin
-          Mensagem('Informe uma Senha.', mtWarning,[mbOk],mrOK,0);
-          EditSenha.SetFocus;
-        end
-      else
-        BTOkClick(Sender);
-    end;
+      Mensagem('Informe uma Senha.', mtWarning, [mbOk], mrOK, 0);
+      EditSenha.SetFocus;
+    end
+    else
+      BTOkClick(Sender);
+  end;
 end;
 
 procedure TLoginForm.FormCreate(Sender: TObject);
