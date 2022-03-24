@@ -1200,7 +1200,7 @@ procedure TPrincipalForm.CadastrarGaronsMesa1Click(Sender: TObject);
 begin
   if (Mensagem('Deseja Inserir os Garçons nas suas Mesas?', mtConfirmation,[mbYES,mbNO],mrYes,0) = mrYes) then
     begin
-      ApagarGarconMesa;
+      ApagarGarconMesa; // limpa garcon
 
       BancoDados.CDSRestauranteMesa.Close;
       BancoDados.qryRestauranteMesa.SQL.Text := 'select * from restaurante_mesa where ativo = 1';
