@@ -124,7 +124,12 @@ type
     ArquivoIni: TIniFile;
     path : String;
     procedure LogarVendedor;
+
+    //refatoração
     procedure ApagarGarconMesa;
+    function CarregarMesasAtiva(Value: Boolean) : TDataSet;
+    function CarregarTodosGarcons : TDataSet;
+    procedure CarregarGarconsMesas(aIdMesa, aIdGarcon : String);
   public
     { Public declarations }
   end;
@@ -1197,43 +1202,69 @@ begin
 end;
 
 procedure TPrincipalForm.CadastrarGaronsMesa1Click(Sender: TObject);
+var
+  lDataSetMesa, lDataSetGarcon: TDataSet;
 begin
   if (Mensagem('Deseja Inserir os Garçons nas suas Mesas?', mtConfirmation,[mbYES,mbNO],mrYes,0) = mrYes) then
     begin
-      ApagarGarconMesa; // comenteria de teste
+      ApagarGarconMesa;
 
-      BancoDados.CDSRestauranteMesa.Close;
-      BancoDados.qryRestauranteMesa.SQL.Text := 'select * from restaurante_mesa where ativo = 1';
-      if (SomenteMesasemuso1.Checked) then
-        BancoDados.qryRestauranteMesa.SQL.Add(' and status <> ' + QuotedStr('LIVRE'));
+      lDataSetMesa := CarregarMesasAtiva(SomenteMesasemuso1.Checked);
+      lDataSetGarcon := CarregarTodosGarcons;
 
-      BancoDados.qryRestauranteMesa.SQL.Add('order by numero');
-      BancoDados.CDSRestauranteMesa.Open;
-      BancoDados.CDSRestauranteMesa.First;
-
-      BancoDados.CDSRestauranteGarcon.Close;
-      BancoDados.qryRestauranteGarcon.SQL.Text := 'select * from restaurante_garcon';
-      BancoDados.CDSRestauranteGarcon.Open;
-
-      BancoDados.CDSRestauranteMesa.First;
-      while not BancoDados.CDSRestauranteMesa.Eof do
+      lDataSetMesa.First;
+      while not lDataSetMesa.Eof do
+      begin
+        lDataSetGarcon.First;
+        while not lDataSetGarcon.Eof do
         begin
-          BancoDados.CDSRestauranteGarcon.First;
-          while not BancoDados.CDSRestauranteGarcon.Eof do
-            begin
-              BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-              BancoDados.qryExecute.SQL.Text := 'insert into restaurante_mesa_garcon(' +
-                'restaurante_mesa_id,restaurante_garcon_id)values(' +
-                IntToStr(BancoDados.CDSRestauranteMesaRESTAURANTE_MESA_ID.Value) + ', ' +
-                IntToStr(BancoDados.CDSRestauranteGarconRESTAURANTE_GARCON_ID.Value) + ');';
-              BancoDados.qryExecute.ExecSQL(True);
-              BancoDados.Conexao.Commit(BancoDados.Transacao);
+          CarregarGarconsMesas(
+            lDataSetMesa.FieldByName('RESTAURANTE_MESA_ID').Value,
+            lDataSetGarcon.FieldByName('RESTAURANTE_GARCON_ID').Value);
 
-              BancoDados.CDSRestauranteGarcon.Next;
-            end;
-          BancoDados.CDSRestauranteMesa.Next;
+          lDataSetGarcon.Next;
         end;
+        lDataSetMesa.Next;
+      end;
     end;
+end;
+
+procedure TPrincipalForm.CarregarGarconsMesas(aIdMesa, aIdGarcon: String);
+begin
+  BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
+  try
+    BancoDados.qryExecute.SQL.Text := 'insert into restaurante_mesa_garcon('+
+      'restaurante_mesa_id,restaurante_garcon_id) '+
+      ' values (' + aIdMesa + ', ' + aIdGarcon +');';
+    BancoDados.qryExecute.ExecSQL(True);
+    BancoDados.Conexao.Commit(BancoDados.Transacao);
+  except
+    BancoDados.Conexao.Rollback(BancoDados.Transacao);
+    raise Exception.Create('Não foi possivel adicionar o garcon a mesa');
+  end;
+end;
+
+function TPrincipalForm.CarregarMesasAtiva(Value: Boolean): TDataSet;
+begin
+  BancoDados.CDSRestauranteMesa.Close;
+  BancoDados.qryRestauranteMesa.SQL.Text := 'select * from restaurante_mesa where ativo = 1';
+
+  if Value then
+    BancoDados.qryRestauranteMesa.SQL.Add(' and status <> ' + QuotedStr('LIVRE'));
+
+  BancoDados.qryRestauranteMesa.SQL.Add('order by numero');
+  BancoDados.CDSRestauranteMesa.Open;
+
+  Result := BancoDados.CDSRestauranteMesa;
+end;
+
+function TPrincipalForm.CarregarTodosGarcons: TDataSet;
+begin
+  BancoDados.CDSRestauranteGarcon.Close;
+  BancoDados.qryRestauranteGarcon.SQL.Text := 'select * from restaurante_garcon';
+  BancoDados.CDSRestauranteGarcon.Open;
+
+  Result := BancoDados.CDSRestauranteGarcon;
 end;
 
 procedure TPrincipalForm.DBGrid1DrawColumnCell(Sender: TObject;
