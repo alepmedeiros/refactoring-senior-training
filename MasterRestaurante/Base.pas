@@ -256,6 +256,8 @@ type
     { Private declarations }
     ArquivoIni: TIniFile;
     path : String;
+
+    procedure IniciarConexao;
   public
     { Public declarations }
     Transacao: TTransactionDesc;
@@ -926,14 +928,29 @@ begin
 
   Path := RCopy(Application.ExeName, '\');
   if FileExists(Path + 'MasterERP.ini') then
-    begin
-      ArquivoIni        := TIniFile.Create(Path + 'MasterERP.ini');
-      AtivaTrace        := (ArquivoIni.ReadString( 'GERAL', 'TRACE','') = '1');
-      imgLogin          := ArquivoIni.ReadString( 'IMAGENS', 'IMGLOGIN','');
-      imgOkLogin        := ArquivoIni.ReadString( 'IMAGENS', 'IMGOKLOGIN','');
-      imgCancelarLogin  := ArquivoIni.ReadString( 'IMAGENS', 'IMGCANCELARLOGIN','');
-      imgSair           := ArquivoIni.ReadString( 'IMAGENS', 'IMGSAIR','');
-    end;
+  begin
+    ArquivoIni        := TIniFile.Create(Path + 'MasterERP.ini');
+    AtivaTrace        := (ArquivoIni.ReadString( 'GERAL', 'TRACE','') = '1');
+    imgLogin          := ArquivoIni.ReadString( 'IMAGENS', 'IMGLOGIN','');
+    imgOkLogin        := ArquivoIni.ReadString( 'IMAGENS', 'IMGOKLOGIN','');
+    imgCancelarLogin  := ArquivoIni.ReadString( 'IMAGENS', 'IMGCANCELARLOGIN','');
+    imgSair           := ArquivoIni.ReadString( 'IMAGENS', 'IMGSAIR','');
+
+    IniciarConexao;
+  end;
+end;
+
+
+procedure TBancoDados.IniciarConexao;
+begin
+  try
+    Conexao.Params.Values['DataBase'] := ArquivoIni.ReadString('Conexao', 'DataBase', '');
+    Conexao.Connected := True;
+  except
+    Raise Exception.Create
+        ('Erro durante a conexão com o Banco de Dados, verifique sua conexão!');
+    Application.Terminate;
+  end;
 end;
 
 end.

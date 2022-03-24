@@ -48,7 +48,6 @@ object BancoDados: TBancoDados
       'WaitOnLocks=True'
       'IsolationLevel=ReadCommitted'
       'Trim Char=False')
-    Connected = True
     Left = 32
     Top = 16
   end
