@@ -190,9 +190,14 @@ end;
 procedure TPrincipalForm.ApagarGarconMesa;
 begin
   BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-  BancoDados.qryExecute.SQL.Text := 'delete from restaurante_mesa_garcon;';
-  BancoDados.qryExecute.ExecSQL(True);
-  BancoDados.Conexao.Commit(BancoDados.Transacao);
+  try
+    BancoDados.qryExecute.SQL.Text := 'delete from restaurante_mesa_garcon;';
+    BancoDados.qryExecute.ExecSQL(True);
+    BancoDados.Conexao.Commit(BancoDados.Transacao);
+  except
+    raise Exception.Create('Erro ao limpar os garcons cadastrados');
+    BancoDados.Conexao.Rollback(BancoDados.Transacao);
+  end;
 end;
 
 procedure TPrincipalForm.NBPrincipalPageChanged(Sender: TObject);
