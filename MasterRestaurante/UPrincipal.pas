@@ -1579,21 +1579,8 @@ procedure TPrincipalForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   case Application.MessageBox('Deseja Sair do Sistema?', 'Atenção',
     MB_YesNo + mb_DefButton2 + mb_IconQuestion) of
-    6:
-      begin
-        BancoDados.qryLogin.Close;
-        BancoDados.CDSRestauranteMesa.Close;
-        path := RCopy(Application.ExeName, '\');
-        if FileExists(path + 'MasterERP.ini') then
-        begin
-          ArquivoIni := TIniFile.Create(path + 'MasterERP.ini');
-          ArquivoIni.WriteBool('GERAL', 'MesasEmAberto',
-            SomenteMesasemuso1.Checked);
-        end;
-        Application.Terminate;
-      end;
-    7:
-      Abort;
+    6: BancoDados.FinalizarConexao(SomenteMesasemuso1.Checked);
+    7: Abort;
   end;
 end;
 
