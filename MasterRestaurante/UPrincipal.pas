@@ -124,6 +124,7 @@ type
     ArquivoIni: TIniFile;
     path : String;
     procedure LogarVendedor;
+    procedure ApagarGarconMesa;
   public
     { Public declarations }
   end;
@@ -179,6 +180,14 @@ begin
    LoginForm.Free;
    LoginForm := nil;
  end;
+end;
+
+procedure TPrincipalForm.ApagarGarconMesa;
+begin
+  BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
+  BancoDados.qryExecute.SQL.Text := 'delete from restaurante_mesa_garcon;';
+  BancoDados.qryExecute.ExecSQL(True);
+  BancoDados.Conexao.Commit(BancoDados.Transacao);
 end;
 
 procedure TPrincipalForm.NBPrincipalPageChanged(Sender: TObject);
@@ -1191,10 +1200,7 @@ procedure TPrincipalForm.CadastrarGaronsMesa1Click(Sender: TObject);
 begin
   if (Mensagem('Deseja Inserir os Garçons nas suas Mesas?', mtConfirmation,[mbYES,mbNO],mrYes,0) = mrYes) then
     begin
-      BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-      BancoDados.qryExecute.SQL.Text := 'delete from restaurante_mesa_garcon;';
-      BancoDados.qryExecute.ExecSQL(True);
-      BancoDados.Conexao.Commit(BancoDados.Transacao);
+      ApagarGarconMesa;
 
       BancoDados.CDSRestauranteMesa.Close;
       BancoDados.qryRestauranteMesa.SQL.Text := 'select * from restaurante_mesa where ativo = 1';
