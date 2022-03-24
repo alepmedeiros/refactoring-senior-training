@@ -265,6 +265,8 @@ type
     Tabela : ShortString;
     VendaID : Integer;
     VendaConcluida : Boolean;
+
+    procedure FinalizarConexao(Value: Boolean);
   end;
 
 var
@@ -940,6 +942,11 @@ begin
   end;
 end;
 
+procedure TBancoDados.FinalizarConexao(Value: Boolean);
+begin
+  ArquivoIni.WriteBool('GERAL', 'MesasEmAberto',Value);
+  Application.Terminate;
+end;
 
 procedure TBancoDados.IniciarConexao;
 begin
