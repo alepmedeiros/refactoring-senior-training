@@ -2,24 +2,22 @@ program MasterRestaurante;
 
 uses
   Forms,
-  UAjuda in 'src\pages\UAjuda.pas' {AjudaForm},
-  UConexao in 'src\pages\UConexao.pas' {ConexaoForm},
-  UFinalizadora in 'src\pages\UFinalizadora.pas' {FinalizadoraForm},
-  UFormaPagamento in 'src\pages\UFormaPagamento.pas' {FormaPagamentoForm},
-  UFormComanda in 'src\pages\UFormComanda.pas' {FormComanda},
-  UItem in 'src\pages\UItem.pas' {ItemForm},
-  ULogin in 'src\pages\ULogin.pas' {LoginForm},
-  UPeriodo in 'src\pages\UPeriodo.pas' {PeriodoForm},
-  UPesquisaComanda in 'src\pages\UPesquisaComanda.pas' {PesquisaComandaForm},
-  UPesquisaProduto in 'src\pages\UPesquisaProduto.pas' {PesquisaProdutoForm},
-  UPrincipal in 'src\pages\UPrincipal.pas' {PrincipalForm},
-  UTroco in 'src\pages\UTroco.pas' {TrocoForm},
-  UVenda in 'src\pages\UVenda.pas' {VendaForm},
-  Base in 'src\infra\db\Base.pas' {BancoDados: TDataModule},
-  UCupomNaoFiscal in 'src\utils\UCupomNaoFiscal.pas',
-  UFuncoes in 'src\utils\UFuncoes.pas',
-  UImprimeComanda in 'src\utils\UImprimeComanda.pas',
-  Base64 in 'src\utils\Base64.pas';
+  UPrincipal in 'UPrincipal.pas' {PrincipalForm},
+  Base in 'Base.pas' {BancoDados: TDataModule},
+  ULogin in 'ULogin.pas' {LoginForm},
+  UFuncoes in 'UFuncoes.pas',
+  UConexao in 'UConexao.pas' {ConexaoForm},
+  UPesquisaProduto in 'UPesquisaProduto.pas' {PesquisaProdutoForm},
+  UVenda in 'UVenda.pas' {VendaForm},
+  UItem in 'UItem.pas' {ItemForm},
+  UFinalizadora in 'UFinalizadora.pas' {FinalizadoraForm},
+  UFormaPagamento in 'UFormaPagamento.pas' {FormaPagamentoForm},
+  UTroco in 'UTroco.pas' {TrocoForm},
+  UAjuda in 'UAjuda.pas' {AjudaForm},
+  UPesquisaComanda in 'UPesquisaComanda.pas' {PesquisaComandaForm},
+  UCupomNaoFiscal in 'UCupomNaoFiscal.pas',
+  UPeriodo in 'UPeriodo.pas' {PeriodoForm},
+  UImprimeComanda in 'UImprimeComanda.pas';
 
 {$R *.res}
 
