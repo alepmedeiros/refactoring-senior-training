@@ -19,7 +19,11 @@ uses
   UCupomNaoFiscal in 'src\utils\UCupomNaoFiscal.pas',
   UFuncoes in 'src\utils\UFuncoes.pas',
   UImprimeComanda in 'src\utils\UImprimeComanda.pas',
-  Base64 in 'src\utils\Base64.pas';
+  Base64 in 'src\utils\Base64.pas',
+  MasterRestaurante.Infra.Interfaces in 'src\infra\db\MasterRestaurante.Infra.Interfaces.pas',
+  MasterRestaurante.Infra.impl.querydbx in 'src\infra\db\impl\MasterRestaurante.Infra.impl.querydbx.pas',
+  MasterRestaurante.core.Interfaces in 'src\core\MasterRestaurante.core.Interfaces.pas',
+  MasterRestaurante.core.impl.mesarepository in 'src\core\impl\MasterRestaurante.core.impl.mesarepository.pas';
 
 {$R *.res}
 

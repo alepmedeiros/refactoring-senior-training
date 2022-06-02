@@ -216,6 +216,10 @@
         <DCCReference Include="src\utils\UFuncoes.pas"/>
         <DCCReference Include="src\utils\UImprimeComanda.pas"/>
         <DCCReference Include="src\utils\Base64.pas"/>
+        <DCCReference Include="src\infra\db\MasterRestaurante.Infra.Interfaces.pas"/>
+        <DCCReference Include="src\infra\db\impl\MasterRestaurante.Infra.impl.querydbx.pas"/>
+        <DCCReference Include="src\core\MasterRestaurante.core.Interfaces.pas"/>
+        <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.mesarepository.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -283,16 +287,16 @@
                 <Platform value="Win64">False</Platform>
             </Platforms>
             <Deployment Version="3">
-                <DeployFile LocalName="bin\MasterRestaurante.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>MasterRestaurante.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="asserts\restaurant.png" Configuration="Debug" Class="UWP_DelphiLogo44">
                     <Platform Name="Win32">
                         <RemoteDir>Assets\</RemoteDir>
                         <RemoteName>Logo44x44.png</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="bin\MasterRestaurante.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>MasterRestaurante.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

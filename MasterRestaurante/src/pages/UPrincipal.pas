@@ -28,7 +28,7 @@ uses
   JvValidateEdit,
   Data.DB,
   System.ImageList,
-  System.Actions;
+  System.Actions, MasterRestaurante.core.impl.mesarepository;
 
 type
   TPrincipalForm = class(TForm)
@@ -458,24 +458,7 @@ end;
 
 procedure TPrincipalForm.VerificaMesaEncerrada(MEsaId: Integer);
 begin
-  with BancoDados.qryAuxiliar do
-    begin
-      Close;
-      SQL.Clear;
-      SQL.Text :=
-        'select restaurante_mesa_id from restaurante_mesa where status = ' +
-        QuotedStr('ENCERRANDO') + ' and numero = ' + IntToStr(MesaID) +
-        ' and restaurante_mesa_id in(select restaurante_mesa_id' +
-        ' from restaurante_comanda where fechado = 1 and venda_id = 0)';
-      Open;
-    end;
-
-    if (BancoDados.qryAuxiliar.IsEmpty) then
-    begin
-      Mensagem('A Mesa informada não foi Encerrada!', mtWarning,
-        [mbOk], mrOk, 0);
-      Exit;
-    end;
+  TMesaRepository.New.MesaEncerrada(MesaId);
 end;
 
 procedure TPrincipalForm.AAjudaExecute(Sender: TObject);
@@ -757,8 +740,10 @@ begin
     try
       if not Assigned(ItemForm) then
         ItemForm := TItemForm.Create(Application);
+
       ItemForm.Caption := 'MasterRestaurante - Cadastrar Iten na Comanda';
       ItemForm.LBTexto.Caption := 'Mesa Nº:';
+
       if (ItemForm.ShowModal = mrOk) then
         MesaID := ItemForm.EditItem.Value
       else
@@ -766,6 +751,7 @@ begin
         Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
         Exit;
       end;
+
     finally
       ItemForm.Free;
       ItemForm := nil;
@@ -1333,12 +1319,6 @@ begin
     .Descricao('Mesa Nº:')
     .Show
     .Mesa(MesaId);
-
-  if not MesaId.ToBoolean then
-  begin
-    Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
-    Abort;
-  end;
 end;
 
 procedure TPrincipalForm.CadastrarGaronsMesa1Click(Sender: TObject);
