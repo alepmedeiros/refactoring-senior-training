@@ -4,8 +4,8 @@ object ItemForm: TItemForm
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'ItemForm'
-  ClientHeight = 109
-  ClientWidth = 254
+  ClientHeight = 95
+  ClientWidth = 274
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,15 +18,15 @@ object ItemForm: TItemForm
   PixelsPerInch = 96
   TextHeight = 13
   object LBTexto: TLabel
-    Left = 40
-    Top = 43
+    Left = 49
+    Top = 39
     Width = 41
     Height = 13
     Caption = 'Item N'#186':'
   end
   object EditItem: TJvValidateEdit
-    Left = 104
-    Top = 35
+    Left = 113
+    Top = 31
     Width = 92
     Height = 32
     Hint = 'Quantidade do Item'

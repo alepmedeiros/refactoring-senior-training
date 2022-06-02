@@ -65,7 +65,12 @@ end;
 function TItemForm.Mesa(var Value: Integer): TItemForm;
 begin
   Result := Self;
-  Value := StrToInt(EditItem.Text);
+  TryStrToInt(EditItem.Text,Value);
+  if Value < 1 then
+  begin
+    Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
+    Abort;
+  end;
 end;
 
 class function TItemForm.New(AWoner: TComponent): TItemForm;
