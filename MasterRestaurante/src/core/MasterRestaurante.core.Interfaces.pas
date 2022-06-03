@@ -14,6 +14,7 @@ type
     function ColocaMesaOcupada(Value: Integer): iMesaRepository;
     function MesaEncerrada(Value: Integer) : iMesaRepository;
     function MesaLivre(Value: Integer) : iMesaRepository;
+    function VisualizaEmUso(Value: Boolean; aRestauranteMesa: TDataSet) : iMesaRepository;
   end;
 
   iVendaRepository = interface
