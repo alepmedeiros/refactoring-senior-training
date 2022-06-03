@@ -548,24 +548,29 @@ begin
   try
     try
       BancoDados.CDSRestauranteMesa.DisableControls;
-      try
-        if not Assigned(ItemForm) then
-          ItemForm := TItemForm.Create(Application);
-        ItemForm.Caption := 'MasterRestaurante - Abrir Comanda';
-        ItemForm.LBTexto.Caption := 'Mesa Nº:';
-
-        if (ItemForm.ShowModal = mrOk) then
-          MesaId := ItemForm.EditItem.Value;
-
-        if not(MesaId > 0) then
-        begin
-          Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
-          Exit;
-        end;
-      finally
-        ItemForm.Free;
-        ItemForm := nil;
-      end;
+      TItemForm.New(Application)
+        .Title('MasterRestaurante - Abrir Comanda')
+        .Descricao('Mesa Nº:')
+        .Show
+        .Mesa(MesaId);
+//      try
+//        if not Assigned(ItemForm) then
+//          ItemForm := TItemForm.Create(Application);
+//        ItemForm.Caption := 'MasterRestaurante - Abrir Comanda';
+//        ItemForm.LBTexto.Caption := 'Mesa Nº:';
+//
+//        if (ItemForm.ShowModal = mrOk) then
+//          MesaId := ItemForm.EditItem.Value;
+//
+//        if not(MesaId > 0) then
+//        begin
+//          Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
+//          Exit;
+//        end;
+//      finally
+//        ItemForm.Free;
+//        ItemForm := nil;
+//      end;
 
       with BancoDados.qryAuxiliar do
       begin
