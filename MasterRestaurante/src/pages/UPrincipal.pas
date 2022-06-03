@@ -337,16 +337,18 @@ begin
   begin
     if (NBPrincipal.Visible) then
     begin
-      BancoDados.CDSRestauranteMesa.Close;
-      BancoDados.qryRestauranteMesa.SQL.Text :=
-        'select * from restaurante_mesa where ativo = 1';
-      if (SomenteMesasemuso1.Checked) then
-        BancoDados.qryRestauranteMesa.SQL.Add(' and status <> ' +
-          QuotedStr('LIVRE'));
-
-      BancoDados.qryRestauranteMesa.SQL.Add('order by numero');
-      BancoDados.CDSRestauranteMesa.Open;
-      BancoDados.CDSRestauranteMesa.First;
+      TMesaRepository.New
+        .VisualizaEmUso(SomenteMesasemuso1.Checked,CDSRestauranteMesa);
+//      BancoDados.CDSRestauranteMesa.Close;
+//      BancoDados.qryRestauranteMesa.SQL.Text :=
+//        'select * from restaurante_mesa where ativo = 1';
+//      if (SomenteMesasemuso1.Checked) then
+//        BancoDados.qryRestauranteMesa.SQL.Add(' and status <> ' +
+//          QuotedStr('LIVRE'));
+//
+//      BancoDados.qryRestauranteMesa.SQL.Add('order by numero');
+//      BancoDados.CDSRestauranteMesa.Open;
+//      BancoDados.CDSRestauranteMesa.First;
     end;
   end;
 end;
@@ -553,24 +555,6 @@ begin
         .Descricao('Mesa Nº:')
         .Show
         .Mesa(MesaId);
-//      try
-//        if not Assigned(ItemForm) then
-//          ItemForm := TItemForm.Create(Application);
-//        ItemForm.Caption := 'MasterRestaurante - Abrir Comanda';
-//        ItemForm.LBTexto.Caption := 'Mesa Nº:';
-//
-//        if (ItemForm.ShowModal = mrOk) then
-//          MesaId := ItemForm.EditItem.Value;
-//
-//        if not(MesaId > 0) then
-//        begin
-//          Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
-//          Exit;
-//        end;
-//      finally
-//        ItemForm.Free;
-//        ItemForm := nil;
-//      end;
 
       with BancoDados.qryAuxiliar do
       begin

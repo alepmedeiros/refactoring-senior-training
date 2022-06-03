@@ -19,8 +19,10 @@ type
     GARCOM = 'SELECT RESTAURANTE_GARCON_ID FROM RESTAURANTE_MESA_GARCON WHERE RESTAURANTE_MESA_ID '+
              'IN (SELECT RESTAURANTE_MESA_ID FROM RESTAURANTE_MESA WHERE NUMERO = %S)';
     STATUS = ' STATUS = %S';
+    STATUSNAO = ' AND STATUS <> %S';
     ATUALIZAMESA = 'UPDATE RESTAURANTE_MESA SET STATUS = %S WHERE NUMERO = %S';
     MESASFECHADAS = 'SELECT RESTAURANTE_MESA_ID FROM RESTAURANTE_COMANDA WHERE FECHADO = 1 AND VENDA_ID = 0';
+    MESAEMUSO = 'SELECT * FROM RESTAURANTE_MESA WHERE ATIVO = 1';
   public
     constructor Create;
     destructor Destroy; override;
@@ -32,6 +34,7 @@ type
     function ColocaMesaOcupada(Value: Integer): iMesaRepository;
     function MesaEncerrada(Value: Integer) : iMesaRepository;
     function MesaLivre(Value: Integer) : iMesaRepository;
+    function VisualizaEmUso(Value: Boolean; aRestauranteMesa: TDataSet) : iMesaRepository;
   end;
 
 implementation
@@ -111,6 +114,24 @@ end;
 class function TMesaRepository.New: iMesaRepository;
 begin
   Result := Self.Create;
+end;
+
+function TMesaRepository.VisualizaEmUso(Value: Boolean;
+  aRestauranteMesa: TDataSet): iMesaRepository;
+var
+  lStatusLivre: String;
+begin
+  Result := Self;
+  lStatusLivre := Format(STATUSNAO,[QuotedStr('LIVRE')]);
+
+  if not Value then
+    lStatusLivre := '';
+
+  aRestauranteMesa.Close;
+  aRestauranteMesa := FQuery.SQL(MESAEMUSO+lStatusLivre+' ORDER BY NUMERO')
+    .Open.DataSet;
+  aRestauranteMesa.Open;
+  aRestauranteMesa.First;
 end;
 
 end.
