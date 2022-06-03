@@ -23,7 +23,10 @@ uses
   MasterRestaurante.Infra.Interfaces in 'src\infra\db\MasterRestaurante.Infra.Interfaces.pas',
   MasterRestaurante.Infra.impl.querydbx in 'src\infra\db\impl\MasterRestaurante.Infra.impl.querydbx.pas',
   MasterRestaurante.core.Interfaces in 'src\core\MasterRestaurante.core.Interfaces.pas',
-  MasterRestaurante.core.impl.mesarepository in 'src\core\impl\MasterRestaurante.core.impl.mesarepository.pas';
+  MasterRestaurante.core.impl.mesarepository in 'src\core\impl\MasterRestaurante.core.impl.mesarepository.pas',
+  MasterRestaurante.core.impl.vendarepository in 'src\core\impl\MasterRestaurante.core.impl.vendarepository.pas',
+  MasterRestaurante.core.impl.comandarepository in 'src\core\impl\MasterRestaurante.core.impl.comandarepository.pas',
+  MasterRestaurante.core.impl.comandaitensrepository in 'src\core\impl\MasterRestaurante.core.impl.comandaitensrepository.pas';
 
 {$R *.res}
 

@@ -220,6 +220,9 @@
         <DCCReference Include="src\infra\db\impl\MasterRestaurante.Infra.impl.querydbx.pas"/>
         <DCCReference Include="src\core\MasterRestaurante.core.Interfaces.pas"/>
         <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.mesarepository.pas"/>
+        <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.vendarepository.pas"/>
+        <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.comandarepository.pas"/>
+        <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.comandaitensrepository.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

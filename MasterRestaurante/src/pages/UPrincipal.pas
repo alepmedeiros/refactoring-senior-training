@@ -28,7 +28,11 @@ uses
   JvValidateEdit,
   Data.DB,
   System.ImageList,
-  System.Actions, MasterRestaurante.core.impl.mesarepository;
+  System.Actions,
+  MasterRestaurante.core.impl.mesarepository,
+  MasterRestaurante.core.impl.vendarepository,
+  MasterRestaurante.core.impl.comandarepository,
+  MasterRestaurante.core.impl.comandaitensrepository;
 
 type
   TPrincipalForm = class(TForm)
@@ -154,7 +158,7 @@ type
     procedure CarregarGarconsMesas(aIdMesa, aIdGarcon: String);
 
     procedure BuscarMesa(var MesaId: Integer);
-    procedure VerificaMesaEncerrada(MEsaId: Integer);
+    procedure VerificaMesaEncerrada(MesaId: Integer);
     procedure SetaVenda;
     function BuscarComanda(MesaId: Integer): Integer;
     procedure SetaItensVenda(ComandaId: Integer);
@@ -307,80 +311,24 @@ begin
   finally
     BancoDados.CDSRestauranteMesa.EnableControls;
     BancoDados.VendaID := 0;
-    if Assigned(FinalizadoraForm) then
-      FinalizadoraForm.DisposeOf;
+//    if Assigned(FinalizadoraForm) then
+//      FinalizadoraForm.DisposeOf;
   end;
 end;
 
 procedure TPrincipalForm.SetaItensVenda(ComandaId: Integer);
-var
-  Item: Integer;
 begin
-  with BancoDados.qryAuxiliar do
-  begin
-    Close;
-    SQL.Text := 'select produto_id, und, COALESCE(sum(quantidade), 0.0),' +
-      ' COALESCE(sum(total), 0.0) from restaurante_comanda_item' +
-      ' where cancelado = 0 and restaurante_comanda_id = ' +
-      IntToStr(ComandaID) + ' group by produto_id, und';
-    Open;
-  end;
-
-  BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-  Item := 0;
-  BancoDados.qryAuxiliar.First;
-  while not BancoDados.qryAuxiliar.Eof do
-  begin
-    inc(Item);
-
-    BancoDados.CDSProduto.Close;
-    BancoDados.qryProduto.SQL.Text := 'select p.*,pp.preco from produto p ' +
-      'left join produto_preco pp on (p.produto_id=pp.produto_id) ' +
-      'where p.produto_id = ' +
-      IntToStr(BancoDados.qryAuxiliar.Fields[0].Value);
-    BancoDados.CDSProduto.Open;
-
-    try
-      BancoDados.qryExecute.SQL.Text :=
-        'insert into venda_item(venda_id,cancelado,produto_id,' +
-        'und,item,quantidade,preco,total)values(' +
-        IntToStr(BancoDados.CDSVendaVENDA_ID.Value) + ', ' + '0, ' +
-        IntToStr(BancoDados.qryAuxiliar.Fields[0].Value) + ', ' +
-        QuotedStr(BancoDados.qryAuxiliar.Fields[1].Value) + ', ' +
-        IntToStr(Item) + ', ' + FloatToStr(BancoDados.qryAuxiliar.Fields[2]
-        .Value) + ', ' + FloatToStr(BancoDados.CDSProdutoPRECO.Value) + ', ' +
-        FloatToStr(BancoDados.qryAuxiliar.Fields[3].Value) + ');';
-      BancoDados.qryExecute.ExecSQL(True);
-    finally
-
-    end;
-
-    BancoDados.qryAuxiliar.Next;
-  end;
-  BancoDados.Conexao.Commit(BancoDados.Transacao);
+  TComandaItensRepository.New
+    .GravarItensVenda(BancoDados.VendaID,ComandaId);
 end;
 
 procedure TPrincipalForm.SetaVenda;
 begin
-  BancoDados.CDSVenda.Close;
-  BancoDados.qryVenda.SQL.Text := 'select * from venda where venda_id = 0';
-  BancoDados.CDSVenda.Open;
-
-  BancoDados.CDSVenda.Append;
-  BancoDados.CDSVendaVENDEDOR_ID.Value := VendedorID;
-  with BancoDados.qryAuxiliar do
-  begin
-    Close;
-    SQL.Clear;
-    SQL.Add('select cliente_id from cliente where pessoa_id' +
-      ' in(select pessoa_id from pessoa where nome_razao = ' +
-      QuotedStr('CLIENTE BALCÃO') + ')');
-    Open;
-  end;
-  BancoDados.CDSVendaCLIENTE_ID.Value :=
-    BancoDados.qryAuxiliar.Fields[0].Value;
-  BancoDados.VendaID := BancoDados.CDSVendaVENDA_ID.Value;
-  BancoDados.CDSVenda.Post;
+  BancoDados.VendaID := TVendaRepository.New
+    .UseDataSet(BancoDados.CDSVenda)
+    .SetaVendedor(VendedorID)
+    .SetaCliente('CLIENTE BALCÃO')
+    .IniciarVenda;
 end;
 
 procedure TPrincipalForm.SomenteMesasemuso1Click(Sender: TObject);
@@ -411,44 +359,17 @@ end;
 
 procedure TPrincipalForm.VendaConcluida(MesaId, ComandaId: Integer);
 begin
-  if (BancoDados.VendaConcluida) then
+  if not BancoDados.VendaConcluida then
   begin
-    BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-    BancoDados.qryExecute.SQL.Text := 'update restaurante_mesa set status = '
-      + QuotedStr('LIVRE') + ' where numero = ' + IntToStr(MesaID) + ';';
-    BancoDados.qryExecute.ExecSQL(True);
-    BancoDados.Conexao.Commit(BancoDados.Transacao);
-
-    BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-    BancoDados.qryExecute.SQL.Text :=
-      'update restaurante_comanda set venda_id = ' +
-      IntToStr(BancoDados.VendaID) + ' where restaurante_comanda_id = ' +
-      IntToStr(ComandaID) + ';';
-    BancoDados.qryExecute.ExecSQL(True);
-    BancoDados.Conexao.Commit(BancoDados.Transacao);
-  end
-  else
-  begin
-    BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-    BancoDados.qryExecute.SQL.Text :=
-      'delete from venda_item where venda_id = ' +
-      IntToStr(BancoDados.VendaID) + ';';
-    BancoDados.qryExecute.ExecSQL(True);
-    BancoDados.Conexao.Commit(BancoDados.Transacao);
-
-    BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-    BancoDados.qryExecute.SQL.Text :=
-      'delete from negociacao where venda_id = ' +
-      IntToStr(BancoDados.VendaID) + ';';
-    BancoDados.qryExecute.ExecSQL(True);
-    BancoDados.Conexao.Commit(BancoDados.Transacao);
-
-    BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
-    BancoDados.qryExecute.SQL.Text := 'delete from venda where venda_id = ' +
-      IntToStr(BancoDados.VendaID) + ';';
-    BancoDados.qryExecute.ExecSQL(True);
-    BancoDados.Conexao.Commit(BancoDados.Transacao);
+    TVendaRepository
+      .New
+        .LimpaItensVendas(BancoDados.VendaID)
+        .LimpaNegociacoes(BancoDados.VendaID)
+        .LimpaVenda(BancoDados.VendaID);
+    Abort;
   end;
+    TMesaRepository.New.MesaLivre(MesaId);
+    TComandaRepository.New.LiberaComanda(BancoDados.VendaID, ComandaId);
 end;
 
 procedure TPrincipalForm.VendasporPerodo1Click(Sender: TObject);
@@ -456,9 +377,11 @@ begin
   CriaForm(TPeriodoForm, PeriodoForm);
 end;
 
-procedure TPrincipalForm.VerificaMesaEncerrada(MEsaId: Integer);
+procedure TPrincipalForm.VerificaMesaEncerrada(MesaId: Integer);
 begin
-  TMesaRepository.New.MesaEncerrada(MesaId);
+  TMesaRepository
+    .New
+      .MesaEncerrada(MesaId);
 end;
 
 procedure TPrincipalForm.AAjudaExecute(Sender: TObject);
@@ -620,7 +543,7 @@ end;
 
 procedure TPrincipalForm.BTAbrirComandaClick(Sender: TObject);
 var
-  MesaID: Integer;
+  MesaId: Integer;
 begin
   try
     try
@@ -632,9 +555,9 @@ begin
         ItemForm.LBTexto.Caption := 'Mesa Nº:';
 
         if (ItemForm.ShowModal = mrOk) then
-          MesaID := ItemForm.EditItem.Value;
+          MesaId := ItemForm.EditItem.Value;
 
-        if not(MesaID > 0) then
+        if not(MesaId > 0) then
         begin
           Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
           Exit;
@@ -650,7 +573,7 @@ begin
         SQL.Clear;
         SQL.Text :=
           'select restaurante_mesa_id from restaurante_mesa where status = ' +
-          QuotedStr('OCUPADA') + ' and numero = ' + IntToStr(MesaID);
+          QuotedStr('OCUPADA') + ' and numero = ' + IntToStr(MesaId);
         Open;
       end;
 
@@ -667,7 +590,7 @@ begin
         SQL.Clear;
         SQL.Text :=
           'select restaurante_mesa_id from restaurante_mesa where status = ' +
-          QuotedStr('ENCERRANDO') + ' and numero = ' + IntToStr(MesaID);
+          QuotedStr('ENCERRANDO') + ' and numero = ' + IntToStr(MesaId);
         Open;
       end;
 
@@ -682,7 +605,7 @@ begin
         Close;
         SQL.Clear;
         SQL.Text := 'select restaurante_mesa_id from restaurante_mesa' +
-          ' where numero = ' + IntToStr(MesaID);
+          ' where numero = ' + IntToStr(MesaId);
         Open;
       end;
 
@@ -698,7 +621,7 @@ begin
         SQL.Clear;
         SQL.Add('select restaurante_garcon_id from restaurante_mesa_garcon' +
           ' where restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-          + ' where numero = ' + IntToStr(MesaID) + ')');
+          + ' where numero = ' + IntToStr(MesaId) + ')');
         Open;
       end;
       if not(BancoDados.qryAuxiliar.IsEmpty) then
@@ -715,7 +638,7 @@ begin
       BancoDados.CDSRestauranteComanda.Post;
 
       BancoDados.qryExecute.SQL.Text := 'update restaurante_mesa set status = '
-        + QuotedStr('OCUPADA') + ' where numero = ' + IntToStr(MesaID) + ';';
+        + QuotedStr('OCUPADA') + ' where numero = ' + IntToStr(MesaId) + ';';
       BancoDados.qryExecute.ExecSQL(True);
 
       BancoDados.CDSRestauranteMesa.Close;
@@ -734,7 +657,7 @@ end;
 
 procedure TPrincipalForm.BTCadastrarItensComandaClick(Sender: TObject);
 var
-  MesaID, GarconID: Integer;
+  MesaId, GarconID: Integer;
 begin
   try
     try
@@ -745,7 +668,7 @@ begin
       ItemForm.LBTexto.Caption := 'Mesa Nº:';
 
       if (ItemForm.ShowModal = mrOk) then
-        MesaID := ItemForm.EditItem.Value
+        MesaId := ItemForm.EditItem.Value
       else
       begin
         Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
@@ -763,7 +686,7 @@ begin
       SQL.Clear;
       SQL.Text :=
         'select restaurante_mesa_id from restaurante_mesa where status = ' +
-        QuotedStr('ENCERRANDO') + ' and numero = ' + IntToStr(MesaID);
+        QuotedStr('ENCERRANDO') + ' and numero = ' + IntToStr(MesaId);
       Open;
     end;
 
@@ -779,7 +702,7 @@ begin
       SQL.Clear;
       SQL.Text :=
         'select restaurante_mesa_id from restaurante_mesa where status = ' +
-        QuotedStr('OCUPADA') + ' and numero = ' + IntToStr(MesaID);
+        QuotedStr('OCUPADA') + ' and numero = ' + IntToStr(MesaId);
       Open;
     end;
 
@@ -794,7 +717,7 @@ begin
         Close;
         SQL.Clear;
         SQL.Text := 'select restaurante_mesa_id from restaurante_mesa' +
-          ' where numero = ' + IntToStr(MesaID);
+          ' where numero = ' + IntToStr(MesaId);
         Open;
       end;
       BancoDados.CDSRestauranteComandaRESTAURANTE_MESA_ID.Value :=
@@ -806,7 +729,7 @@ begin
         SQL.Clear;
         SQL.Add('select restaurante_garcon_id from restaurante_mesa_garcon ' +
           'where restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa '
-          + 'where numero = ' + IntToStr(MesaID) + ')');
+          + 'where numero = ' + IntToStr(MesaId) + ')');
         Open;
       end;
       if not(BancoDados.qryAuxiliar.IsEmpty) then
@@ -835,7 +758,7 @@ begin
       BancoDados.CDSRestauranteComanda.Post;
 
       BancoDados.qryExecute.SQL.Text := 'update restaurante_mesa set status = '
-        + QuotedStr('OCUPADA') + ' where numero = ' + IntToStr(MesaID) + ';';
+        + QuotedStr('OCUPADA') + ' where numero = ' + IntToStr(MesaId) + ';';
       BancoDados.qryExecute.ExecSQL(True);
 
       BancoDados.CDSRestauranteMesa.Close;
@@ -848,7 +771,7 @@ begin
       ' where venda_id = 0 and fechado = 0 and cancelado = 0 and vendedor_id = '
       + IntToStr(VendedorID) +
       ' and restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-      + ' where numero = ' + IntToStr(MesaID) + ')';
+      + ' where numero = ' + IntToStr(MesaId) + ')';
     BancoDados.CDSRestauranteComanda.Open;
 
     BancoDados.CDSItens.Close;
@@ -859,7 +782,7 @@ begin
       'group by produto_id, descricao, und, preco';
     BancoDados.CDSItens.Open;
 
-    LBMesa.Caption := IntToStr(MesaID);
+    LBMesa.Caption := IntToStr(MesaId);
     LBComanda.Caption := FormatFloat('0000000000',
       BancoDados.CDSRestauranteComandaRESTAURANTE_COMANDA_ID.Value);
     NBPrincipal.PageIndex := 1;
@@ -876,12 +799,12 @@ end;
 
 procedure TPrincipalForm.BTComandaEmAbertoClick(Sender: TObject);
 var
-  MesaID: Integer;
+  MesaId: Integer;
 begin
   if (NBPrincipal.Visible) then
   begin
     try
-      MesaID := 0;
+      MesaId := 0;
       BancoDados.CDSRestauranteComandaItem.DisableControls;
       if not Assigned(VendaForm) then
         VendaForm := TVendaForm.Create(Application);
@@ -897,7 +820,7 @@ begin
         ItemForm.Caption := 'MasterRestaurante - Abrir Comanda';
         ItemForm.LBTexto.Caption := 'Mesa Nº:';
         if (ItemForm.ShowModal = mrOk) then
-          MesaID := ItemForm.EditItem.Value
+          MesaId := ItemForm.EditItem.Value
         else
         begin
           Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
@@ -914,7 +837,7 @@ begin
         ' where fechado = 0 and cancelado = 0 and vendedor_id = ' +
         IntToStr(VendedorID) +
         ' and restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-        + ' where numero = ' + IntToStr(MesaID) + ')';
+        + ' where numero = ' + IntToStr(MesaId) + ')';
       BancoDados.CDSRestauranteComanda.Open;
 
       if (BancoDados.CDSRestauranteComandaFECHADO.Value = 1) then
@@ -922,7 +845,7 @@ begin
         try
           if not Assigned(PesquisaComandaForm) then
             PesquisaComandaForm := TPesquisaComandaForm.Create(Application);
-          PesquisaComandaForm.MesaID := MesaID;
+          PesquisaComandaForm.MesaId := MesaId;
           if (PesquisaComandaForm.ShowModal = mrOk) then
             BancoDados.VendaID :=
               BancoDados.CDSRestauranteComandaRESTAURANTE_COMANDA_ID.Value
@@ -971,7 +894,7 @@ end;
 
 procedure TPrincipalForm.BTCancelaComandaClick(Sender: TObject);
 var
-  MesaID: Integer;
+  MesaId: Integer;
 begin
   if (NBPrincipal.Visible) then
   begin
@@ -986,7 +909,7 @@ begin
           ItemForm.Caption := 'MasterRestaurante - Abrir Comanda';
           ItemForm.LBTexto.Caption := 'Mesa Nº:';
           if (ItemForm.ShowModal = mrOk) then
-            MesaID := ItemForm.EditItem.Value
+            MesaId := ItemForm.EditItem.Value
           else
           begin
             Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
@@ -998,7 +921,7 @@ begin
         end;
       end
       else
-        MesaID := StrToInt(LBMesa.Caption);
+        MesaId := StrToInt(LBMesa.Caption);
 
       if (Mensagem('Deseja Cancelar a Comanda?', mtConfirmation, [mbYES, mbNO],
         mrYes, 0) = mrYes) then
@@ -1009,7 +932,7 @@ begin
           ' where fechado = 0 and cancelado = 0 and venda_id = 0 and vendedor_id = '
           + IntToStr(VendedorID) +
           ' and restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-          + ' where numero = ' + IntToStr(MesaID) + ')';
+          + ' where numero = ' + IntToStr(MesaId) + ')';
         BancoDados.CDSRestauranteComanda.Open;
 
         BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
@@ -1024,7 +947,7 @@ begin
         BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
         BancoDados.qryExecute.SQL.Text :=
           'update restaurante_mesa set status = ' + QuotedStr('LIVRE') +
-          ' where numero = ' + IntToStr(MesaID) + ';';
+          ' where numero = ' + IntToStr(MesaId) + ';';
         BancoDados.qryExecute.ExecSQL(True);
         BancoDados.Conexao.Commit(BancoDados.Transacao);
 
@@ -1083,10 +1006,10 @@ end;
 
 procedure TPrincipalForm.BTEncerrarComandaClick(Sender: TObject);
 var
-  MesaID, Item, ComandaID: Integer;
+  MesaId, Item, ComandaId: Integer;
 begin
-  MesaID := 0;
-  ComandaID := 0;
+  MesaId := 0;
+  ComandaId := 0;
   if (NBPrincipal.PageIndex = 0) then
   begin
     try
@@ -1095,7 +1018,7 @@ begin
       ItemForm.Caption := 'MasterRestaurante - Encerrar Comanda';
       ItemForm.LBTexto.Caption := 'Mesa Nº:';
       if (ItemForm.ShowModal = mrOk) then
-        MesaID := ItemForm.EditItem.Value
+        MesaId := ItemForm.EditItem.Value
       else
       begin
         Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
@@ -1107,7 +1030,7 @@ begin
     end;
   end
   else
-    MesaID := StrToInt(LBMesa.Caption);
+    MesaId := StrToInt(LBMesa.Caption);
 
   with BancoDados.qryAuxiliar do
   begin
@@ -1116,11 +1039,11 @@ begin
     SQL.Add('select restaurante_comanda_id from restaurante_comanda' +
       ' where fechado = 0 and cancelado = 0 and restaurante_mesa_id' +
       ' in(select restaurante_mesa_id' +
-      ' from restaurante_mesa where numero = ' + IntToStr(MesaID) + ')');
+      ' from restaurante_mesa where numero = ' + IntToStr(MesaId) + ')');
     Open;
   end;
 
-  ComandaID := BancoDados.qryAuxiliar.Fields[0].Value;
+  ComandaId := BancoDados.qryAuxiliar.Fields[0].Value;
 
   if not(BancoDados.qryAuxiliar.IsEmpty) then
   begin
@@ -1130,7 +1053,7 @@ begin
       SQL.Clear;
       SQL.Add('select restaurante_comanda_id from restaurante_comanda_item' +
         ' where cancelado = 0 and restaurante_comanda_id = ' +
-        IntToStr(ComandaID));
+        IntToStr(ComandaId));
       Open;
     end;
 
@@ -1142,14 +1065,14 @@ begin
         BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
         BancoDados.qryExecute.SQL.Text :=
           'update restaurante_comanda set fechado = 1' +
-          ' where restaurante_comanda_id = ' + IntToStr(ComandaID) + ';';
+          ' where restaurante_comanda_id = ' + IntToStr(ComandaId) + ';';
         BancoDados.qryExecute.ExecSQL(True);
         BancoDados.Conexao.Commit(BancoDados.Transacao);
 
         BancoDados.Conexao.StartTransaction(BancoDados.Transacao);
         BancoDados.qryExecute.SQL.Text :=
           'update restaurante_mesa set status = ' + QuotedStr('ENCERRANDO') +
-          ' where numero = ' + IntToStr(MesaID) + ';';
+          ' where numero = ' + IntToStr(MesaId) + ';';
         BancoDados.qryExecute.ExecSQL(True);
         BancoDados.Conexao.Commit(BancoDados.Transacao);
 
@@ -1166,7 +1089,7 @@ begin
 
         if (Mensagem('Deseja Imprimir a Comanda?', mtConfirmation,
           [mbYES, mbNO], mrYes, 0) = mrYes) then
-          ImprimeComanda(ComandaID);
+          ImprimeComanda(ComandaId);
 
         NBPrincipal.PageIndex := 0;
       finally
@@ -1195,31 +1118,31 @@ end;
 
 procedure TPrincipalForm.BTFecharContaClick(Sender: TObject);
 var
-  MesaID, Item, ComandaID: Integer;
+  MesaId, Item, ComandaId: Integer;
 begin
-    MesaID := 0;
-    ComandaID := 0;
+  MesaId := 0;
+  ComandaId := 0;
 
-    BuscarMesa(MesaId);
+  BuscarMesa(MesaId);
 
-    VerificaMesaEncerrada(MesaId);
+  VerificaMesaEncerrada(MesaId);
 
-    SetaVenda;
+  SetaVenda;
 
-    ComandaID := BuscarComanda(MesaID);
+  ComandaId := BuscarComanda(MesaId);
 
-    SetaItensVenda(ComandaId);
+  SetaItensVenda(ComandaId);
 
-    FinalizarVenda;
+  FinalizarVenda;
 
-    VendaConcluida(MesaId,ComandaId);
+  VendaConcluida(MesaId, ComandaId);
 
-    ResetaMesa;
+  ResetaMesa;
 end;
 
 procedure TPrincipalForm.BTImprimeComandaClick(Sender: TObject);
 var
-  MesaID: Integer;
+  MesaId: Integer;
 begin
   if (NBPrincipal.PageIndex = 0) then
   begin
@@ -1229,7 +1152,7 @@ begin
       ItemForm.Caption := 'MasterRestaurante - Imprimir Comanda';
       ItemForm.LBTexto.Caption := 'Mesa Nº:';
       if (ItemForm.ShowModal = mrOk) then
-        MesaID := ItemForm.EditItem.Value
+        MesaId := ItemForm.EditItem.Value
       else
       begin
         Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
@@ -1246,7 +1169,7 @@ begin
       ' where venda_id = 0 and cancelado = 0 and vendedor_id = ' +
       IntToStr(VendedorID) +
       ' and restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-      + ' where numero = ' + IntToStr(MesaID) + ')';
+      + ' where numero = ' + IntToStr(MesaId) + ')';
     BancoDados.CDSRestauranteComanda.Open;
 
     if (BancoDados.CDSRestauranteComanda.IsEmpty) then
@@ -1286,39 +1209,22 @@ end;
 
 function TPrincipalForm.BuscarComanda(MesaId: Integer): Integer;
 begin
-  BancoDados.CDSRestauranteComanda.Close;
-  BancoDados.qryRestauranteComanda.SQL.Text :=
-    'select * from restaurante_comanda' +
-    ' where venda_id = 0 and cancelado = 0 and vendedor_id = ' +
-    IntToStr(VendedorID) +
-    ' and restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-    + ' where numero = ' + IntToStr(MesaID) + ')';
-  BancoDados.CDSRestauranteComanda.Open;
-
-  if (BancoDados.CDSRestauranteComanda.IsEmpty) then
-  begin
-    Mensagem('Nenhuma Comanda foi Localizada!', mtWarning, [mbOk], mrOk, 0);
-    Exit;
-  end
-  else
-    BancoDados.CDSRestauranteComanda.Last;
-
-  Result := BancoDados.CDSRestauranteComandaRESTAURANTE_COMANDA_ID.Value;
+  TComandaRepository.New
+    .Mesa(MesaId)
+    .Vendedor(VendedorID)
+    .ExisteComanda(Result);
 end;
 
 procedure TPrincipalForm.BuscarMesa(var MesaId: Integer);
 begin
   if not NBPrincipal.PageIndex = 0 then
   begin
-    MesaId :=  StrToInt(LBMesa.Caption);
+    MesaId := StrToInt(LBMesa.Caption);
     Exit;
   end;
 
-  TItemForm.New(Application)
-    .Title('MasterRestaurante - Fechar Conta')
-    .Descricao('Mesa Nº:')
-    .Show
-    .Mesa(MesaId);
+  TItemForm.New(Application).Title('MasterRestaurante - Fechar Conta')
+    .Descricao('Mesa Nº:').Show.Mesa(MesaId);
 end;
 
 procedure TPrincipalForm.CadastrarGaronsMesa1Click(Sender: TObject);
@@ -1591,8 +1497,8 @@ begin
     FinalizadoraForm := TFinalizadoraForm.Create(Application);
 
   BancoDados.CDSVenda.Close;
-    BancoDados.qryVenda.SQL.Text := 'select * from venda where venda_id = ' +
-      IntToStr(BancoDados.VendaID);
+  BancoDados.qryVenda.SQL.Text := 'select * from venda where venda_id = ' +
+    IntToStr(BancoDados.VendaID);
   BancoDados.CDSVenda.Open;
 
   FinalizadoraForm.ShowModal;
@@ -1602,8 +1508,10 @@ procedure TPrincipalForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   case Application.MessageBox('Deseja Sair do Sistema?', 'Atenção',
     MB_YesNo + mb_DefButton2 + mb_IconQuestion) of
-    6: BancoDados.FinalizarConexao(SomenteMesasemuso1.Checked);
-    7: Abort;
+    6:
+      BancoDados.FinalizarConexao(SomenteMesasemuso1.Checked);
+    7:
+      Abort;
   end;
 end;
 

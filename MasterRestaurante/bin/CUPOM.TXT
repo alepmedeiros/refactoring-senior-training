@@ -1,26 +1,19 @@
                 EMPRESA DE TESTE                
-
 RUA DE TESTE
 Cidade: Campina Grande
 Bairro: Centro
 Telefone: (83) 8888-8888 CNPJ: 00.000.000/0001-00
 ================================================
-                    CUPOM NAO FISCAL
-
-Data: 01/06/2022 Hora: 14:30:59
-Cupom: 0000000308
+                   MESA: 002                   
+Data: 03/06/2022 Hora: 16:18:53
+Comanda: 0000000373
 ================================================
 Cód.  Descricao                Unit  Qtde Valor
 ================================================
-00002 PRODUTO DE TESTE           5,00 1,00 5,00
-00003 TESTE                      10,00 1,00 10,00
-================================================
-Dinheiro: R$ 15,00
+00002 PRODUTO DE TESTE           5,00 2,00 10,00
+00003 TESTE                      10,00 5,00 50,00
 
-Total: R$ 15,00
-A Receber: R$ 15,00
-Pago: R$ 0,00
-Troco: -R$ 15,00
+Total: R$ 60,00
 ================================================
 Vendedor: Magnaldo Araújo de Melo
      !!!FAZEMOS O MELHOR PENSANDO EM VOCE!!!

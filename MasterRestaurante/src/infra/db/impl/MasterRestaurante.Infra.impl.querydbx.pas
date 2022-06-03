@@ -23,7 +23,7 @@ type
     function Params(aParams: String): Variant; overload;
     function Open: iQuery;
     function ExecSQL: iQuery;
-    function DataSet(value: TDataSet): iQuery; overload;
+    function DataSet(value: TDataSource): iQuery; overload;
     function DataSet: TDataSet; overload;
     function Commit : iQuery;
     function Rollback : iQuery;
@@ -45,10 +45,10 @@ begin
   FQuery.SQLConnection := FConn.Conexao;
 end;
 
-function TQueryDBX.DataSet(value: TDataSet): iQuery;
+function TQueryDBX.DataSet(value: TDataSource): iQuery;
 begin
   Result := Self;
-  Value := FQuery;
+  value.DataSet := FQuery;
 end;
 
 function TQueryDBX.DataSet: TDataSet;

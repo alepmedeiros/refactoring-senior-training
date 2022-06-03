@@ -217,8 +217,8 @@ object PrincipalForm: TPrincipalForm
           OnClick = BTCancelaComandaClick
         end
         object BTFecharConta: TSpeedButton
-          Left = 8
-          Top = 246
+          Left = 4
+          Top = 243
           Width = 179
           Height = 45
           Hint = 'Fechar Conta (F11)'

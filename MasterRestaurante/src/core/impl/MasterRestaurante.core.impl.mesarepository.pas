@@ -31,6 +31,7 @@ type
     function CarregaGarcomMesa(Value: Integer): TDataSet;
     function ColocaMesaOcupada(Value: Integer): iMesaRepository;
     function MesaEncerrada(Value: Integer) : iMesaRepository;
+    function MesaLivre(Value: Integer) : iMesaRepository;
   end;
 
 implementation
@@ -84,11 +85,26 @@ end;
 function TMesaRepository.MesaEncerrada(Value: Integer) : iMesaRepository;
 begin
   Result := Self;
-  if FQuery.SQL(Format(MESA +' AND '+STATUS+' AND RESTAURANTE_MESA_ID IN('+MESASFECHADAS+')',
+  if FQuery
+      .SQL(Format(MESA +' AND '+STATUS+' AND RESTAURANTE_MESA_ID IN('+MESASFECHADAS+')',
     [Value.ToString, QuotedStr('ENCERRANDO')])).Open.DataSet.IsEmpty then
   begin
     Mensagem('A Mesa informada não foi Encerrada!', mtWarning, [mbOk], mrOk, 0);
     Abort;
+  end;
+end;
+
+function TMesaRepository.MesaLivre(Value: Integer): iMesaRepository;
+begin
+  Result := Self;
+  FQuery.StartTransaction;
+  try
+    FQuery.SQL(Format(ATUALIZAMESA,[QuotedStr('LIVRE'), Value.ToString]))
+      .ExecSQL
+      .Commit;
+  except
+    FQuery.Rollback;
+    raise Exception.Create('Erro ao tentar colocar mesa como livre');
   end;
 end;
 
