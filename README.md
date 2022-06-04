@@ -35,3 +35,11 @@ If your answer to these questions is "no", you have legacy code and it is consum
 * [Clean up after your pull request is merged.](./requirements/cleaning-after-merged.md)
 
 > ## Branch created to keep the previous project so that others can perform their proper refactoring tests 
+
+---
+> ## ⚠️Warning⚠️
+> The project is receiving merges of the changes made on the developer branch, and in the comments of the pull requests there is a reference to each class that is being refactored.
+
+>If you want to have the project in its original state, just fork the repository in the title of this document.
+If the original repository for this project no longer exists, you can find it inside my own repository ["Before Refactoring System"](https://github.com/alepmedeiros/system-before-refactoring).
+---
