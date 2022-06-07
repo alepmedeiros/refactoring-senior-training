@@ -223,6 +223,8 @@
         <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.vendarepository.pas"/>
         <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.comandarepository.pas"/>
         <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.comandaitensrepository.pas"/>
+        <DCCReference Include="src\core\impl\MasterRestaurante.core.impl.garcomrepository.pas"/>
+        <DCCReference Include="src\infra\db\impl\MasterRestaurante.Infra.impl.datasetabstract.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

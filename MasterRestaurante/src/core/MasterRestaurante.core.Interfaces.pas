@@ -10,7 +10,6 @@ type
     function EstaOcupada(Value: Integer) : iMesaRepository;
     function Encerrando(Value: Integer) : iMesaRepository;
     function CarregaDados(Value: Integer) : TDataSet;
-    function CarregaGarcomMesa(Value: Integer): TDataSet;
     function ColocaMesaOcupada(Value: Integer): iMesaRepository;
     function MesaEncerrada(Value: Integer) : iMesaRepository;
     function MesaLivre(Value: Integer) : iMesaRepository;
@@ -32,10 +31,16 @@ type
     function Vendedor(Value: Integer) : iComandaRepository;
     function ExisteComanda(var aComandaID: Integer) : iComandaRepository;
     function LiberaComanda(aVendaId, aComandaID: Integer) : iComandaRepository;
+    function RegistraComanda(aMesaId, aGarcomId: Integer; aDataSet: TDataSet) : iComandaRepository;
   end;
 
   iComandaItensRepository = interface
     function GravarItensVenda(aVendaId, aComanda: Integer) : iComandaItensRepository;
+  end;
+
+  iGarcomRepository = interface
+    function BuscaGarcomMesa(aMesaId: Integer) : iGarcomRepository;
+    function RetornaGarcom : Integer;
   end;
 
 implementation

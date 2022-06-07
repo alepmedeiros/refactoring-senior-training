@@ -32,7 +32,8 @@ uses
   MasterRestaurante.core.impl.mesarepository,
   MasterRestaurante.core.impl.vendarepository,
   MasterRestaurante.core.impl.comandarepository,
-  MasterRestaurante.core.impl.comandaitensrepository;
+  MasterRestaurante.core.impl.comandaitensrepository,
+  MasterRestaurante.core.impl.garcomrepository;
 
 type
   TPrincipalForm = class(TForm)
@@ -538,93 +539,32 @@ var
   MesaId: Integer;
 begin
   try
-    try
-      BancoDados.CDSRestauranteMesa.DisableControls;
-      TItemForm.New(Application)
-        .Title('MasterRestaurante - Abrir Comanda')
-        .Descricao('Mesa Nº:')
-        .Show
-        .Mesa(MesaId);
-
-      with BancoDados.qryAuxiliar do
-      begin
-        Close;
-        SQL.Clear;
-        SQL.Text :=
-          'select restaurante_mesa_id from restaurante_mesa where status = ' +
-          QuotedStr('OCUPADA') + ' and numero = ' + IntToStr(MesaId);
-        Open;
-      end;
-
-      if not(BancoDados.qryAuxiliar.IsEmpty) then
-      begin
-        Mensagem('Existe uma Comanda aberta para esta Mesa!', mtWarning,
-          [mbOk], mrOk, 0);
-        Exit;
-      end;
-
-      with BancoDados.qryAuxiliar do
-      begin
-        Close;
-        SQL.Clear;
-        SQL.Text :=
-          'select restaurante_mesa_id from restaurante_mesa where status = ' +
-          QuotedStr('ENCERRANDO') + ' and numero = ' + IntToStr(MesaId);
-        Open;
-      end;
-
-      if not(BancoDados.qryAuxiliar.IsEmpty) then
-      begin
-        Mensagem('Mesa sendo Encerrada!', mtWarning, [mbOk], mrOk, 0);
-        Exit;
-      end;
-
-      with BancoDados.qryAuxiliar do
-      begin
-        Close;
-        SQL.Clear;
-        SQL.Text := 'select restaurante_mesa_id from restaurante_mesa' +
-          ' where numero = ' + IntToStr(MesaId);
-        Open;
-      end;
+    TItemForm.New(Application)
+      .Title('MasterRestaurante - Abrir Comanda')
+      .Descricao('Mesa Nº:')
+      .Show
+      .Mesa(MesaId);
 
       BancoDados.CDSRestauranteComanda.Close;
       BancoDados.CDSRestauranteComanda.Open;
       BancoDados.CDSRestauranteComanda.Append;
-      BancoDados.CDSRestauranteComandaRESTAURANTE_MESA_ID.Value :=
-        BancoDados.qryAuxiliar.Fields[0].Value;
+      BancoDados.CDSRestauranteComandaRESTAURANTE_MESA_ID.AsInteger :=
+        TMesaRepository.New
+          .EstaOcupada(MesaId)
+          .Encerrando(MesaId)
+          .CarregaDados(MesaId).Fields[0].AsInteger;
 
-      with BancoDados.qryAuxiliar do
-      begin
-        Close;
-        SQL.Clear;
-        SQL.Add('select restaurante_garcon_id from restaurante_mesa_garcon' +
-          ' where restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-          + ' where numero = ' + IntToStr(MesaId) + ')');
-        Open;
-      end;
-      if not(BancoDados.qryAuxiliar.IsEmpty) then
-      begin
-        BancoDados.CDSRestauranteComandaRESTAURANTE_GARCON_ID.Value :=
-          BancoDados.qryAuxiliar.Fields[0].Value;
-      end
-      else
-      begin
-        Mensagem('Não foi localizado nenhum Garçon para esta Mesa: ' +
-          IntToStr(BancoDados.CDSRestauranteMesaNUMERO.Value), mtWarning,
-          [mbOk], mrOk, 0);
-      end;
+    BancoDados.CDSRestauranteComandaRESTAURANTE_GARCON_ID.AsInteger :=
+    TGarcomRepository.New
+      .BuscaGarcomMesa(MesaId)
+      .RetornaGarcom;
+
       BancoDados.CDSRestauranteComanda.Post;
-
-      BancoDados.qryExecute.SQL.Text := 'update restaurante_mesa set status = '
-        + QuotedStr('OCUPADA') + ' where numero = ' + IntToStr(MesaId) + ';';
-      BancoDados.qryExecute.ExecSQL(True);
 
       BancoDados.CDSRestauranteMesa.Close;
       BancoDados.CDSRestauranteMesa.Open;
-    finally
-      BancoDados.CDSRestauranteMesa.EnableControls;
-    end;
+
+      TMesaRepository.New.ColocaMesaOcupada(MesaId);
   except
     begin
       Mensagem('Falha ao Tentar iniciar a Comanda!', mtWarning, [mbOk],

@@ -26,7 +26,9 @@ uses
   MasterRestaurante.core.impl.mesarepository in 'src\core\impl\MasterRestaurante.core.impl.mesarepository.pas',
   MasterRestaurante.core.impl.vendarepository in 'src\core\impl\MasterRestaurante.core.impl.vendarepository.pas',
   MasterRestaurante.core.impl.comandarepository in 'src\core\impl\MasterRestaurante.core.impl.comandarepository.pas',
-  MasterRestaurante.core.impl.comandaitensrepository in 'src\core\impl\MasterRestaurante.core.impl.comandaitensrepository.pas';
+  MasterRestaurante.core.impl.comandaitensrepository in 'src\core\impl\MasterRestaurante.core.impl.comandaitensrepository.pas',
+  MasterRestaurante.core.impl.garcomrepository in 'src\core\impl\MasterRestaurante.core.impl.garcomrepository.pas',
+  MasterRestaurante.Infra.impl.datasetabstract in 'src\infra\db\impl\MasterRestaurante.Infra.impl.datasetabstract.pas';
 
 {$R *.res}
 

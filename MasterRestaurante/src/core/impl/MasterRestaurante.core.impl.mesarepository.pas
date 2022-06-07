@@ -16,8 +16,6 @@ type
 
   const
     MESA = 'SELECT RESTAURANTE_MESA_ID FROM RESTAURANTE_MESA WHERE NUMERO = %S';
-    GARCOM = 'SELECT RESTAURANTE_GARCON_ID FROM RESTAURANTE_MESA_GARCON WHERE RESTAURANTE_MESA_ID '+
-             'IN (SELECT RESTAURANTE_MESA_ID FROM RESTAURANTE_MESA WHERE NUMERO = %S)';
     STATUS = ' STATUS = %S';
     STATUSNAO = ' AND STATUS <> %S';
     ATUALIZAMESA = 'UPDATE RESTAURANTE_MESA SET STATUS = %S WHERE NUMERO = %S';
@@ -30,7 +28,6 @@ type
     function EstaOcupada(Value: Integer): iMesaRepository;
     function Encerrando(Value: Integer): iMesaRepository;
     function CarregaDados(Value: Integer): TDataSet;
-    function CarregaGarcomMesa(Value: Integer): TDataSet;
     function ColocaMesaOcupada(Value: Integer): iMesaRepository;
     function MesaEncerrada(Value: Integer) : iMesaRepository;
     function MesaLivre(Value: Integer) : iMesaRepository;
@@ -42,11 +39,6 @@ implementation
 function TMesaRepository.CarregaDados(Value: Integer): TDataSet;
 begin
   Result := FQuery.SQL(Format(MESA, [Value.ToString])).Open.DataSet;
-end;
-
-function TMesaRepository.CarregaGarcomMesa(Value: Integer): TDataSet;
-begin
-  Result := FQuery.SQL(Format(GARCOM, [Value.ToString])).Open.DataSet;
 end;
 
 function TMesaRepository.ColocaMesaOcupada(Value: Integer): iMesaRepository;

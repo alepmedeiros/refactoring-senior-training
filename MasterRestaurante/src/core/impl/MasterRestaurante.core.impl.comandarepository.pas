@@ -10,12 +10,13 @@ uses
   Data.DB,
   Vcl.Dialogs,
   System.UITypes,
-  UFuncoes;
+  UFuncoes, MasterRestaurante.Infra.impl.datasetabstract;
 
 type
   TComandaRepository = class(TInterfacedObject, iComandaRepository)
   private
     FQuery: iQuery;
+    FDataSet: iDataSetAbstract;
     FMesa: Integer;
     FVendedor: Integer;
 
@@ -32,6 +33,7 @@ type
     function Vendedor(Value: Integer): iComandaRepository;
     function ExisteComanda(var aComandaID: Integer): iComandaRepository;
     function LiberaComanda(aVendaId, aComandaID: Integer) : iComandaRepository;
+    function RegistraComanda(aMesaId, aGarcomId: Integer; aDataSet: TDataSet) : iComandaRepository;
   end;
 
 implementation
@@ -39,6 +41,7 @@ implementation
 constructor TComandaRepository.Create;
 begin
   FQuery := TQueryDBX.New;
+  FDataSet := TDataSetAbstract.New;
 end;
 
 destructor TComandaRepository.Destroy;
@@ -84,6 +87,19 @@ end;
 class function TComandaRepository.New: iComandaRepository;
 begin
   Result := Self.Create;
+end;
+
+function TComandaRepository.RegistraComanda(aMesaId, aGarcomId: Integer;
+  aDataSet: TDataSet): iComandaRepository;
+begin
+  Result := Self;
+  FDataSet.UseDataSet(aDataSet)
+  .Autalizar
+    .Append
+    .Fields('RESTAURANTE_MESA_ID',aMesaId)
+    .Fields('RESTAURANTE_GARCON_ID',aGarcomId)
+  .Post
+  .Autalizar;
 end;
 
 function TComandaRepository.Vendedor(Value: Integer): iComandaRepository;

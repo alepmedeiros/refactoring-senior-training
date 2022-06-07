@@ -19,6 +19,14 @@ type
     function Rollback : iQuery;
   end;
 
+  iDataSetAbstract = interface
+    function UseDataSet(Value: TDataSet) : iDataSetAbstract;
+    function Autalizar : iDataSetAbstract;
+    function Fields(aField: String; aValue: Variant) : iDataSetAbstract;
+    function Append : iDataSetAbstract;
+    function Post : iDataSetAbstract;
+  end;
+
 implementation
 
 end.
