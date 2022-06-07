@@ -27,8 +27,8 @@ type
     constructor Create;
     destructor Destroy; override;
     class function New: iMesaRepository;
-    function EstaOcupada(Value: Integer): Boolean;
-    function Encerrando(Value: Integer): Boolean;
+    function EstaOcupada(Value: Integer): iMesaRepository;
+    function Encerrando(Value: Integer): iMesaRepository;
     function CarregaDados(Value: Integer): TDataSet;
     function CarregaGarcomMesa(Value: Integer): TDataSet;
     function ColocaMesaOcupada(Value: Integer): iMesaRepository;
@@ -73,16 +73,27 @@ begin
   inherited;
 end;
 
-function TMesaRepository.Encerrando(Value: Integer): Boolean;
+function TMesaRepository.Encerrando(Value: Integer): iMesaRepository;
 begin
-  Result := FQuery.SQL(Format(MESA +' AND '+STATUS, [Value.ToString, QuotedStr('ENCERRANDO')]))
-    .Open.DataSet.IsEmpty;
+  Result := Self;
+  if not FQuery.SQL(Format(MESA +' AND '+STATUS, [Value.ToString, QuotedStr('ENCERRANDO')]))
+    .Open.DataSet.IsEmpty then
+  begin
+    Mensagem('Mesa sendo Encerrada!', mtWarning, [mbOk], mrOk, 0);
+    Abort;
+  end;
 end;
 
-function TMesaRepository.EstaOcupada(Value: Integer): Boolean;
+function TMesaRepository.EstaOcupada(Value: Integer): iMesaRepository;
 begin
-  Result := FQuery.SQL(Format(MESA +' AND '+STATUS, [Value.ToString, QuotedStr('OCUPADA')]))
-    .Open.DataSet.IsEmpty;
+  Result := Self;
+  if not FQuery.SQL(Format(MESA +' AND '+STATUS, [Value.ToString, QuotedStr('OCUPADA')]))
+    .Open.DataSet.IsEmpty then
+  begin
+    Mensagem('Existe uma Comanda aberta para esta Mesa!', mtWarning,
+      [mbOk], mrOk, 0);
+    Abort;
+  end;
 end;
 
 function TMesaRepository.MesaEncerrada(Value: Integer) : iMesaRepository;

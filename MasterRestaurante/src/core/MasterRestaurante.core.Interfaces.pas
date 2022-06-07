@@ -7,8 +7,8 @@ uses
 
 type
   iMesaRepository = interface
-    function EstaOcupada(Value: Integer) : Boolean;
-    function Encerrando(Value: Integer) : Boolean;
+    function EstaOcupada(Value: Integer) : iMesaRepository;
+    function Encerrando(Value: Integer) : iMesaRepository;
     function CarregaDados(Value: Integer) : TDataSet;
     function CarregaGarcomMesa(Value: Integer): TDataSet;
     function ColocaMesaOcupada(Value: Integer): iMesaRepository;
