@@ -338,17 +338,7 @@ begin
     if (NBPrincipal.Visible) then
     begin
       TMesaRepository.New
-        .VisualizaEmUso(SomenteMesasemuso1.Checked,CDSRestauranteMesa);
-//      BancoDados.CDSRestauranteMesa.Close;
-//      BancoDados.qryRestauranteMesa.SQL.Text :=
-//        'select * from restaurante_mesa where ativo = 1';
-//      if (SomenteMesasemuso1.Checked) then
-//        BancoDados.qryRestauranteMesa.SQL.Add(' and status <> ' +
-//          QuotedStr('LIVRE'));
-//
-//      BancoDados.qryRestauranteMesa.SQL.Add('order by numero');
-//      BancoDados.CDSRestauranteMesa.Open;
-//      BancoDados.CDSRestauranteMesa.First;
+        .VisualizaEmUso(SomenteMesasemuso1.Checked,BancoDados.CDSRestauranteMesa);
     end;
   end;
 end;
