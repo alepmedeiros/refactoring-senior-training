@@ -62,10 +62,11 @@ begin
           FloatToStr(lDataSet.fields[2].AsFloat),
           FloatToStr(lDataSet.fields[4].AsFloat),
           FloatTOStr(lDataSet.fields[3].AsFloat)]))
-        .ExecSQL.Commit;
+        .ExecSQL;
 
       lDataSet.Next;
     end;
+    FQuery.Commit;
   except
     FQuery.Rollback;
     raise Exception.Create('Não foi possivel inserir os intens da comanda na venda.');

@@ -217,7 +217,7 @@ object PrincipalForm: TPrincipalForm
           OnClick = BTCancelaComandaClick
         end
         object BTFecharConta: TSpeedButton
-          Left = 4
+          Left = 8
           Top = 243
           Width = 179
           Height = 45
