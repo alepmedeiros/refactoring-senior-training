@@ -21,7 +21,7 @@ type
 
   iDataSetAbstract = interface
     function UseDataSet(Value: TDataSet) : iDataSetAbstract;
-    function Autalizar : iDataSetAbstract;
+    function Atualizar : iDataSetAbstract;
     function Fields(aField: String; aValue: Variant) : iDataSetAbstract;
     function Append : iDataSetAbstract;
     function Post : iDataSetAbstract;

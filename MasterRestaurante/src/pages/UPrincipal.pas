@@ -33,7 +33,8 @@ uses
   MasterRestaurante.core.impl.vendarepository,
   MasterRestaurante.core.impl.comandarepository,
   MasterRestaurante.core.impl.comandaitensrepository,
-  MasterRestaurante.core.impl.garcomrepository;
+  MasterRestaurante.core.impl.garcomrepository,
+  MasterRestaurante.Infra.impl.datasetabstract;
 
 type
   TPrincipalForm = class(TForm)
@@ -166,6 +167,7 @@ type
     procedure FinalizarVenda;
     procedure VendaConcluida(MesaId, ComandaId: Integer);
     procedure ResetaMesa;
+    procedure RegistraComanda(MesaId: Integer);
   public
     { Public declarations }
   end;
@@ -312,24 +314,29 @@ begin
   finally
     BancoDados.CDSRestauranteMesa.EnableControls;
     BancoDados.VendaID := 0;
-//    if Assigned(FinalizadoraForm) then
-//      FinalizadoraForm.DisposeOf;
   end;
+end;
+
+procedure TPrincipalForm.RegistraComanda(MesaId: Integer);
+begin
+  TMesaRepository.New
+      .EstaOcupada(MesaId)
+      .MesaEncerrada(MesaId);
+
+  TComandaRepository.New
+    .RegistraComanda(MesaId,TGarcomRepository.New.BuscaGarcomMesa(MesaId).RetornaGarcom
+      ,BancoDados.CDSRestauranteComanda);
 end;
 
 procedure TPrincipalForm.SetaItensVenda(ComandaId: Integer);
 begin
-  TComandaItensRepository.New
-    .GravarItensVenda(BancoDados.VendaID,ComandaId);
+  TComandaItensRepository.New.GravarItensVenda(BancoDados.VendaID, ComandaId);
 end;
 
 procedure TPrincipalForm.SetaVenda;
 begin
-  BancoDados.VendaID := TVendaRepository.New
-    .UseDataSet(BancoDados.CDSVenda)
-    .SetaVendedor(VendedorID)
-    .SetaCliente('CLIENTE BALCÃO')
-    .IniciarVenda;
+  BancoDados.VendaID := TVendaRepository.New.UseDataSet(BancoDados.CDSVenda)
+    .SetaVendedor(VendedorID).SetaCliente('CLIENTE BALCÃO').IniciarVenda;
 end;
 
 procedure TPrincipalForm.SomenteMesasemuso1Click(Sender: TObject);
@@ -338,8 +345,8 @@ begin
   begin
     if (NBPrincipal.Visible) then
     begin
-      TMesaRepository.New
-        .VisualizaEmUso(SomenteMesasemuso1.Checked,BancoDados.CDSRestauranteMesa);
+      TMesaRepository.New.VisualizaEmUso(SomenteMesasemuso1.Checked,
+        BancoDados.CDSRestauranteMesa);
     end;
   end;
 end;
@@ -354,15 +361,12 @@ procedure TPrincipalForm.VendaConcluida(MesaId, ComandaId: Integer);
 begin
   if not BancoDados.VendaConcluida then
   begin
-    TVendaRepository
-      .New
-        .LimpaItensVendas(BancoDados.VendaID)
-        .LimpaNegociacoes(BancoDados.VendaID)
-        .LimpaVenda(BancoDados.VendaID);
+    TVendaRepository.New.LimpaItensVendas(BancoDados.VendaID)
+      .LimpaNegociacoes(BancoDados.VendaID).LimpaVenda(BancoDados.VendaID);
     Abort;
   end;
-    TMesaRepository.New.MesaLivre(MesaId);
-    TComandaRepository.New.LiberaComanda(BancoDados.VendaID, ComandaId);
+  TMesaRepository.New.MesaLivre(MesaId);
+  TComandaRepository.New.LiberaComanda(BancoDados.VendaID, ComandaId);
 end;
 
 procedure TPrincipalForm.VendasporPerodo1Click(Sender: TObject);
@@ -372,9 +376,7 @@ end;
 
 procedure TPrincipalForm.VerificaMesaEncerrada(MesaId: Integer);
 begin
-  TMesaRepository
-    .New
-      .MesaEncerrada(MesaId);
+  TMesaRepository.New.MesaEncerrada(MesaId);
 end;
 
 procedure TPrincipalForm.AAjudaExecute(Sender: TObject);
@@ -538,40 +540,12 @@ procedure TPrincipalForm.BTAbrirComandaClick(Sender: TObject);
 var
   MesaId: Integer;
 begin
-  try
-    TItemForm.New(Application)
-      .Title('MasterRestaurante - Abrir Comanda')
-      .Descricao('Mesa Nº:')
-      .Show
-      .Mesa(MesaId);
+  TItemForm.New(Application).Title('MasterRestaurante - Abrir Comanda')
+    .Descricao('Mesa Nº:').Show.Mesa(MesaId);
 
-      BancoDados.CDSRestauranteComanda.Close;
-      BancoDados.CDSRestauranteComanda.Open;
-      BancoDados.CDSRestauranteComanda.Append;
-      BancoDados.CDSRestauranteComandaRESTAURANTE_MESA_ID.AsInteger :=
-        TMesaRepository.New
-          .EstaOcupada(MesaId)
-          .Encerrando(MesaId)
-          .CarregaDados(MesaId).Fields[0].AsInteger;
+  RegistraComanda(MesaId);
 
-    BancoDados.CDSRestauranteComandaRESTAURANTE_GARCON_ID.AsInteger :=
-    TGarcomRepository.New
-      .BuscaGarcomMesa(MesaId)
-      .RetornaGarcom;
-
-      BancoDados.CDSRestauranteComanda.Post;
-
-      BancoDados.CDSRestauranteMesa.Close;
-      BancoDados.CDSRestauranteMesa.Open;
-
-      TMesaRepository.New.ColocaMesaOcupada(MesaId);
-  except
-    begin
-      Mensagem('Falha ao Tentar iniciar a Comanda!', mtWarning, [mbOk],
-        mrOk, 0);
-      Abort;
-    end;
-  end;
+  TMesaRepository.New.ColocaMesaOcupada(MesaId);
 end;
 
 procedure TPrincipalForm.BTCadastrarItensComandaClick(Sender: TObject);
@@ -1128,9 +1102,7 @@ end;
 
 function TPrincipalForm.BuscarComanda(MesaId: Integer): Integer;
 begin
-  TComandaRepository.New
-    .Mesa(MesaId)
-    .Vendedor(VendedorID)
+  TComandaRepository.New.Mesa(MesaId).Vendedor(VendedorID)
     .ExisteComanda(Result);
 end;
 

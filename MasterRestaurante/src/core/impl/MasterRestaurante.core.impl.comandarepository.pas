@@ -93,13 +93,20 @@ function TComandaRepository.RegistraComanda(aMesaId, aGarcomId: Integer;
   aDataSet: TDataSet): iComandaRepository;
 begin
   Result := Self;
-  FDataSet.UseDataSet(aDataSet)
-  .Autalizar
-    .Append
-    .Fields('RESTAURANTE_MESA_ID',aMesaId)
-    .Fields('RESTAURANTE_GARCON_ID',aGarcomId)
-  .Post
-  .Autalizar;
+  try
+    FDataSet.UseDataSet(aDataSet)
+    .Atualizar
+      .Append
+      .Fields('RESTAURANTE_MESA_ID',aMesaId)
+      .Fields('RESTAURANTE_GARCON_ID',aGarcomId)
+    .Post
+    .Atualizar;
+  except begin
+    Mensagem('Falha ao Tentar iniciar a Comanda!', mtWarning, [mbOk],
+        mrOk, 0);
+    Abort;
+    end;
+  end;
 end;
 
 function TComandaRepository.Vendedor(Value: Integer): iComandaRepository;

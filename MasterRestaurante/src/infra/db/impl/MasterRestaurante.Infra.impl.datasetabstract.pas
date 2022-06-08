@@ -14,7 +14,7 @@ type
       destructor Destroy; override;
       class function New : iDataSetAbstract;
       function UseDataSet(Value: TDataSet) : iDataSetAbstract;
-      function Autalizar : iDataSetAbstract;
+      function Atualizar : iDataSetAbstract;
       function Fields(aField: String; aValue: Variant) : iDataSetAbstract;
       function Append : iDataSetAbstract;
       function Post : iDataSetAbstract;
@@ -28,7 +28,7 @@ begin
   FDataSet.Append;
 end;
 
-function TDataSetAbstract.Autalizar: iDataSetAbstract;
+function TDataSetAbstract.Atualizar: iDataSetAbstract;
 begin
   Result := Self;
   FDataSet.Close;
