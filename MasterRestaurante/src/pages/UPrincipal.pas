@@ -168,7 +168,9 @@ type
     procedure VendaConcluida(MesaId, ComandaId: Integer);
     procedure ResetaMesa;
     procedure RegistraComanda(MesaId: Integer);
-    procedure PreparaItensVenda;
+    procedure PreparaItensVenda(aMesa, aComanda: Integer);
+
+    procedure ChamaMesa(aTitulo, aDescricao: String; var aMesa: Integer);
   public
     { Public declarations }
   end;
@@ -327,7 +329,7 @@ begin
     BancoDados.CDSRestauranteComanda);
 end;
 
-procedure TPrincipalForm.PreparaItensVenda;
+procedure TPrincipalForm.PreparaItensVenda(aMesa, aComanda: Integer);
 begin
   BancoDados.CDSItens.Close;
   BancoDados.qryItens.SQL.Text := 'select produto_id, descricao, und, preco,' +
@@ -337,8 +339,8 @@ begin
     'group by produto_id, descricao, und, preco';
   BancoDados.CDSItens.Open;
 
-  LBMesa.Caption := MesaId.ToString;
-  LBComanda.Caption := FormatFloat('0000000000',lComanda);
+  LBMesa.Caption := aMesa.ToString;
+  LBComanda.Caption := FormatFloat('0000000000',aComanda);
   NBPrincipal.PageIndex := 1;
   EditQtd.Value := 1;
   EditCodigo.SetFocus;
@@ -579,7 +581,7 @@ begin
 
     lComanda := BuscarComanda(MesaId);
 
-    PreparaItensVenda;
+    PreparaItensVenda(MesaId, lComanda);
   except
     begin
       Mensagem('Falha ao Tentar alterar os itens da Comanda!', mtWarning,
@@ -803,39 +805,12 @@ begin
   MesaId := 0;
   ComandaId := 0;
   if (NBPrincipal.PageIndex = 0) then
-  begin
-    try
-      if not Assigned(ItemForm) then
-        ItemForm := TItemForm.Create(Application);
-      ItemForm.Caption := 'MasterRestaurante - Encerrar Comanda';
-      ItemForm.LBTexto.Caption := 'Mesa Nº:';
-      if (ItemForm.ShowModal = mrOk) then
-        MesaId := ItemForm.EditItem.Value
-      else
-      begin
-        Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
-        Abort;
-      end;
-    finally
-      ItemForm.Free;
-      ItemForm := nil;
-    end;
-  end
+    ChamaMesa('MasterRestaurante - Encerrar Comanda',
+      'Mesa Nº:',MesaId)
   else
     MesaId := StrToInt(LBMesa.Caption);
 
-  with BancoDados.qryAuxiliar do
-  begin
-    Close;
-    SQL.Clear;
-    SQL.Add('select restaurante_comanda_id from restaurante_comanda' +
-      ' where fechado = 0 and cancelado = 0 and restaurante_mesa_id' +
-      ' in(select restaurante_mesa_id' +
-      ' from restaurante_mesa where numero = ' + IntToStr(MesaId) + ')');
-    Open;
-  end;
-
-  ComandaId := BancoDados.qryAuxiliar.Fields[0].Value;
+  ComandaId := BuscarComanda(MesaId);
 
   if not(BancoDados.qryAuxiliar.IsEmpty) then
   begin
@@ -934,46 +909,19 @@ end;
 
 procedure TPrincipalForm.BTImprimeComandaClick(Sender: TObject);
 var
-  MesaId: Integer;
+  lMesa,lComanda: Integer;
 begin
   if (NBPrincipal.PageIndex = 0) then
   begin
-    try
-      if not Assigned(ItemForm) then
-        ItemForm := TItemForm.Create(Application);
-      ItemForm.Caption := 'MasterRestaurante - Imprimir Comanda';
-      ItemForm.LBTexto.Caption := 'Mesa Nº:';
-      if (ItemForm.ShowModal = mrOk) then
-        MesaId := ItemForm.EditItem.Value
-      else
-      begin
-        Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
-        Exit;
-      end;
-    finally
-      ItemForm.Free;
-      ItemForm := nil;
-    end;
+    ChamaMesa('MasterRestaurante - Imprimir Comanda','Mesa Nº:',lMesa);
 
-    BancoDados.CDSRestauranteComanda.Close;
-    BancoDados.qryRestauranteComanda.SQL.Text :=
-      'select * from restaurante_comanda' +
-      ' where venda_id = 0 and cancelado = 0 and vendedor_id = ' +
-      IntToStr(VendedorID) +
-      ' and restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-      + ' where numero = ' + IntToStr(MesaId) + ')';
-    BancoDados.CDSRestauranteComanda.Open;
-
-    if (BancoDados.CDSRestauranteComanda.IsEmpty) then
-    begin
-      Mensagem('Nenhuma Comanda foi Localizada!', mtWarning, [mbOk], mrOk, 0);
-      Exit;
-    end
-    else
-      BancoDados.CDSRestauranteComanda.Last;
+    TComandaRepository.New
+      .Mesa(lMesa)
+      .Vendedor(VendedorID)
+      .ExisteComanda(lComanda);
   end;
 
-  ImprimeComanda(BancoDados.CDSRestauranteComandaRESTAURANTE_COMANDA_ID.Value);
+  ImprimeComanda(lComanda);
 
   if (NBPrincipal.PageIndex = 0) then
   begin
@@ -1084,6 +1032,15 @@ begin
   BancoDados.CDSRestauranteGarcon.Open;
 
   Result := BancoDados.CDSRestauranteGarcon;
+end;
+
+procedure TPrincipalForm.ChamaMesa(aTitulo, aDescricao: String; var aMesa: Integer);
+begin
+  TItemForm.New(Application)
+    .Title(aTitulo)
+    .Descricao(aDescricao)
+    .Show
+    .Mesa(aMesa);
 end;
 
 procedure TPrincipalForm.DBGrid1DrawColumnCell(Sender: TObject;
