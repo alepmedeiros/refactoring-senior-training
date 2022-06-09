@@ -168,6 +168,7 @@ type
     procedure VendaConcluida(MesaId, ComandaId: Integer);
     procedure ResetaMesa;
     procedure RegistraComanda(MesaId: Integer);
+    procedure PreparaItensVenda;
   public
     { Public declarations }
   end;
@@ -319,13 +320,28 @@ end;
 
 procedure TPrincipalForm.RegistraComanda(MesaId: Integer);
 begin
-  TMesaRepository.New
-      .EstaOcupada(MesaId)
-      .MesaEncerrada(MesaId);
+  TMesaRepository.New.EstaOcupada(MesaId).MesaEncerrada(MesaId);
 
-  TComandaRepository.New
-    .RegistraComanda(MesaId,TGarcomRepository.New.BuscaGarcomMesa(MesaId).RetornaGarcom
-      ,BancoDados.CDSRestauranteComanda);
+  TComandaRepository.New.RegistraComanda(MesaId,
+    TGarcomRepository.New.BuscaGarcomMesa(MesaId).RetornaGarcom,
+    BancoDados.CDSRestauranteComanda);
+end;
+
+procedure TPrincipalForm.PreparaItensVenda;
+begin
+  BancoDados.CDSItens.Close;
+  BancoDados.qryItens.SQL.Text := 'select produto_id, descricao, und, preco,' +
+    'COALESCE(sum(quantidade), 0.0)as QUANTIDADE,COALESCE(sum(total), 0.0)as TOTAL'
+    + ' from restaurante_comanda_item where cancelado = 0 and restaurante_comanda_id = '
+    + IntToStr(BancoDados.CDSRestauranteComandaRESTAURANTE_COMANDA_ID.Value) +
+    'group by produto_id, descricao, und, preco';
+  BancoDados.CDSItens.Open;
+
+  LBMesa.Caption := MesaId.ToString;
+  LBComanda.Caption := FormatFloat('0000000000',lComanda);
+  NBPrincipal.PageIndex := 1;
+  EditQtd.Value := 1;
+  EditCodigo.SetFocus;
 end;
 
 procedure TPrincipalForm.SetaItensVenda(ComandaId: Integer);
@@ -550,137 +566,20 @@ end;
 
 procedure TPrincipalForm.BTCadastrarItensComandaClick(Sender: TObject);
 var
-  MesaId, GarconID: Integer;
+  MesaId, GarconID, lComanda: Integer;
 begin
   try
-    try
-      if not Assigned(ItemForm) then
-        ItemForm := TItemForm.Create(Application);
+    TItemForm.New(Application)
+      .Title('MasterRestaurante - Cadastrar Iten na Comanda')
+      .Descricao('Mesa Nº:').Show.Mesa(MesaId);
 
-      ItemForm.Caption := 'MasterRestaurante - Cadastrar Iten na Comanda';
-      ItemForm.LBTexto.Caption := 'Mesa Nº:';
+    TMesaRepository.New.MesaEncerrada(MesaId);
 
-      if (ItemForm.ShowModal = mrOk) then
-        MesaId := ItemForm.EditItem.Value
-      else
-      begin
-        Mensagem('Nenhuma Mesa foi informada!', mtWarning, [mbOk], mrOk, 0);
-        Exit;
-      end;
+    RegistraComanda(MesaId);
 
-    finally
-      ItemForm.Free;
-      ItemForm := nil;
-    end;
+    lComanda := BuscarComanda(MesaId);
 
-    with BancoDados.qryAuxiliar do
-    begin
-      Close;
-      SQL.Clear;
-      SQL.Text :=
-        'select restaurante_mesa_id from restaurante_mesa where status = ' +
-        QuotedStr('ENCERRANDO') + ' and numero = ' + IntToStr(MesaId);
-      Open;
-    end;
-
-    if not(BancoDados.qryAuxiliar.IsEmpty) then
-    begin
-      Mensagem('Mesa sendo Encerrada!', mtWarning, [mbOk], mrOk, 0);
-      Exit;
-    end;
-
-    with BancoDados.qryAuxiliar do
-    begin
-      Close;
-      SQL.Clear;
-      SQL.Text :=
-        'select restaurante_mesa_id from restaurante_mesa where status = ' +
-        QuotedStr('OCUPADA') + ' and numero = ' + IntToStr(MesaId);
-      Open;
-    end;
-
-    if (BancoDados.qryAuxiliar.IsEmpty) then
-    begin
-      BancoDados.CDSRestauranteComanda.Close;
-      BancoDados.CDSRestauranteComanda.Open;
-      BancoDados.CDSRestauranteComanda.Append;
-
-      with BancoDados.qryAuxiliar do
-      begin
-        Close;
-        SQL.Clear;
-        SQL.Text := 'select restaurante_mesa_id from restaurante_mesa' +
-          ' where numero = ' + IntToStr(MesaId);
-        Open;
-      end;
-      BancoDados.CDSRestauranteComandaRESTAURANTE_MESA_ID.Value :=
-        BancoDados.qryAuxiliar.Fields[0].Value;
-
-      with BancoDados.qryAuxiliar do
-      begin
-        Close;
-        SQL.Clear;
-        SQL.Add('select restaurante_garcon_id from restaurante_mesa_garcon ' +
-          'where restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa '
-          + 'where numero = ' + IntToStr(MesaId) + ')');
-        Open;
-      end;
-      if not(BancoDados.qryAuxiliar.IsEmpty) then
-      begin
-        BancoDados.CDSRestauranteComandaRESTAURANTE_GARCON_ID.Value :=
-          BancoDados.qryAuxiliar.Fields[0].Value;
-        GarconID := BancoDados.qryAuxiliar.Fields[0].Value;
-
-        with BancoDados.qryAuxiliar do
-        begin
-          Close;
-          SQL.Clear;
-          SQL.Add('select nome from restaurante_garcon where restaurante_garcon_id = '
-            + IntToStr(GarconID));
-          Open;
-        end;
-        LBGarcon.Caption := BancoDados.qryAuxiliar.Fields[0].Value;
-      end
-      else
-      begin
-        Mensagem('Não foi localizado nenhum Garçon para esta Mesa: ' +
-          IntToStr(BancoDados.CDSRestauranteMesaNUMERO.Value), mtWarning,
-          [mbOk], mrOk, 0);
-      end;
-
-      BancoDados.CDSRestauranteComanda.Post;
-
-      BancoDados.qryExecute.SQL.Text := 'update restaurante_mesa set status = '
-        + QuotedStr('OCUPADA') + ' where numero = ' + IntToStr(MesaId) + ';';
-      BancoDados.qryExecute.ExecSQL(True);
-
-      BancoDados.CDSRestauranteMesa.Close;
-      BancoDados.CDSRestauranteMesa.Open;
-    end;
-
-    BancoDados.CDSRestauranteComanda.Close;
-    BancoDados.qryRestauranteComanda.SQL.Text :=
-      'select * from restaurante_comanda' +
-      ' where venda_id = 0 and fechado = 0 and cancelado = 0 and vendedor_id = '
-      + IntToStr(VendedorID) +
-      ' and restaurante_mesa_id in(select restaurante_mesa_id from restaurante_mesa'
-      + ' where numero = ' + IntToStr(MesaId) + ')';
-    BancoDados.CDSRestauranteComanda.Open;
-
-    BancoDados.CDSItens.Close;
-    BancoDados.qryItens.SQL.Text := 'select produto_id, descricao, und, preco,'
-      + 'COALESCE(sum(quantidade), 0.0)as QUANTIDADE,COALESCE(sum(total), 0.0)as TOTAL'
-      + ' from restaurante_comanda_item where cancelado = 0 and restaurante_comanda_id = '
-      + IntToStr(BancoDados.CDSRestauranteComandaRESTAURANTE_COMANDA_ID.Value) +
-      'group by produto_id, descricao, und, preco';
-    BancoDados.CDSItens.Open;
-
-    LBMesa.Caption := IntToStr(MesaId);
-    LBComanda.Caption := FormatFloat('0000000000',
-      BancoDados.CDSRestauranteComandaRESTAURANTE_COMANDA_ID.Value);
-    NBPrincipal.PageIndex := 1;
-    EditQtd.Value := 1;
-    EditCodigo.SetFocus;
+    PreparaItensVenda;
   except
     begin
       Mensagem('Falha ao Tentar alterar os itens da Comanda!', mtWarning,

@@ -2,7 +2,7 @@ object PrincipalForm: TPrincipalForm
   Left = 0
   Top = 0
   BorderStyle = bsSingle
-  Caption = 'PrincipalForm'
+  Caption = '210,0,'
   ClientHeight = 659
   ClientWidth = 991
   Color = clBtnFace
